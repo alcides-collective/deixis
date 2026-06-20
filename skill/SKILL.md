@@ -47,6 +47,20 @@ migration"; status `failed`, note "type error in auth.ts").
 Replaces the card's markdown pane. GFM is supported — headings, lists, tables,
 code fences, links, images. Keep it short; it lives in a small card.
 
+## Showing a spec/plan for review
+
+When you produce a spec, plan, or other document you want the user to review:
+
+1. Call `render_file("<path>")` so it opens in the Deixis reading view — don't ask
+   them to open it in an editor.
+2. Then ask for the verdict in a **normal message**, and include the spec inline
+   (or a tight summary + the path). Do NOT use a blocking/elicitation prompt — a
+   plain turn is what Remote Control relays, so the user can read and approve from
+   their phone, away from the keyboard.
+
+The browser overlay is the at-the-desk view; your message is the away-from-keyboard
+one. Both come from this one step.
+
 ## Status semantics
 
 - `active` — you are working on this step right now (keep exactly one active).
