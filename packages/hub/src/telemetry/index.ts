@@ -44,6 +44,7 @@ export class Telemetry {
           model: t.model,
           usage: t.usage,
           costUsd: computeCost(t.usage, price),
+          contextTokens: t.contextTokens,
           lastMessage: t.lastMessage,
           status: t.hasError ? "errored" : status,
         });

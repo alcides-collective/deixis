@@ -29,4 +29,14 @@ describe("parseTranscript", () => {
     ]);
     expect(s.hasError).toBe(true);
   });
+
+  it("extracts contextTokens from the last assistant turn (input + cache_read)", () => {
+    const lines = [
+      '{"type":"assistant","message":{"id":"a","model":"m","usage":{"input_tokens":100,"output_tokens":5,"cache_creation_input_tokens":0,"cache_read_input_tokens":2000},"content":[{"type":"text","text":"x"}]}}',
+      '{"type":"assistant","message":{"id":"b","model":"m","usage":{"input_tokens":50,"output_tokens":5,"cache_creation_input_tokens":0,"cache_read_input_tokens":300},"content":[{"type":"text","text":"y"}]}}',
+    ];
+    const s = parseTranscript(lines);
+    // last turn b: 50 + 300
+    expect(s.contextTokens).toBe(350);
+  });
 });

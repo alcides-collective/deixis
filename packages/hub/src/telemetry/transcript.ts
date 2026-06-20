@@ -6,6 +6,7 @@ export interface TranscriptSummary {
   model?: string;
   lastMessage?: string;
   hasError: boolean;
+  contextTokens: number;
 }
 
 interface Row {
@@ -35,6 +36,7 @@ export function parseTranscript(lines: string[]): TranscriptSummary {
   let model: string | undefined;
   let lastMessage: string | undefined;
   let hasError = false;
+  let contextTokens = 0;
 
   for (const line of lines) {
     if (!line.trim()) continue;
@@ -52,6 +54,7 @@ export function parseTranscript(lines: string[]): TranscriptSummary {
     if (row.message.stop_reason === "error") hasError = true;
 
     const u = row.message.usage;
+    contextTokens = (u.input_tokens ?? 0) + (u.cache_read_input_tokens ?? 0);
     const cur: TokenUsage = {
       input: u.input_tokens ?? 0,
       output: u.output_tokens ?? 0,
@@ -70,7 +73,7 @@ export function parseTranscript(lines: string[]): TranscriptSummary {
     usage.cacheCreate += v.cacheCreate;
     usage.cacheRead += v.cacheRead;
   }
-  return { usage, model, lastMessage, hasError };
+  return { usage, model, lastMessage, hasError, contextTokens };
 }
 
 // Cache by path -> {mtimeMs, summary} so repeated reads of an unchanged file are cheap.
