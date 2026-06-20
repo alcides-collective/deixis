@@ -1,0 +1,5 @@
+{
+  "opus":   { "input": 0.000015,  "output": 0.000075 },
+  "sonnet": { "input": 0.000003,  "output": 0.000015 },
+  "haiku":  { "input": 0.0000008, "output": 0.000004 }
+}
