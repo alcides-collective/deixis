@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@deixis/shared": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "motion": "^11.11.0",
