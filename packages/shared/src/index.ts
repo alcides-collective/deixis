@@ -20,6 +20,7 @@ export interface SessionState {
   hasCanvas: boolean;       // agent pushed markdown/progress
   hasTelemetry: boolean;    // hook/JSONL data present
   telemetry?: SessionTelemetry;
+  document?: DocumentState;
 }
 
 // ---- telemetry ----
@@ -45,6 +46,13 @@ export interface SessionTelemetry {
   lastMessage?: string;     // trimmed assistant snippet
   pid?: number;
   updatedAt: number;
+}
+
+export interface DocumentState {
+  path: string;
+  title: string;
+  markdown: string;
+  openedAt: number; // epoch ms, stamped by the hub on each render_file
 }
 
 // ---- shim -> hub request bodies ----
