@@ -1,3 +1,16 @@
+import { useSessions } from "./lib/useSessions.js";
+import { Grid } from "./components/Grid.js";
+import { ThemeToggle } from "./components/ThemeToggle.js";
+
 export default function App() {
-  return <main className="p-8 text-[15px]">Deixis canvas — no sessions yet.</main>;
+  const sessions = useSessions();
+  return (
+    <main>
+      <header className="flex items-center justify-between border-b px-4 py-3">
+        <span className="text-[13px] font-medium tracking-[0.05em] uppercase">Deixis</span>
+        <ThemeToggle />
+      </header>
+      <Grid sessions={sessions} />
+    </main>
+  );
 }
