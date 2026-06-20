@@ -53,13 +53,23 @@ async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
 
-  const bye = () => {
-    void post(`/session/${sessionId}/disconnect`, {});
+  let exiting = false;
+  const bye = async () => {
+    if (exiting) return;
+    exiting = true;
+    // Safety net: never hang the process on a slow/hung hub.
+    const safety = setTimeout(() => process.exit(0), 1000);
+    safety.unref();
+    try {
+      await post(`/session/${sessionId}/disconnect`, {});
+    } catch {
+      // best-effort; we're exiting regardless
+    }
     process.exit(0);
   };
-  process.on("SIGTERM", bye);
-  process.on("SIGINT", bye);
-  process.stdin.on("close", bye);
+  process.on("SIGTERM", () => void bye());
+  process.on("SIGINT", () => void bye());
+  process.stdin.on("close", () => void bye());
 }
 
 void main();
