@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>deixis — a visual surface for terminal Claude Code</title>
-<meta name="description" content="Deixis gives terminal Claude Code a browser canvas the agent draws to, live per-session telemetry, and a menu-bar glance. macOS." />
+<meta name="description" content="Deixis gives terminal Claude Code a browser canvas the agent draws to, a reading view for specs it wants you to review, live per-session telemetry, and a menu-bar glance. macOS." />
 <style>
   :root {
     --bg: oklch(1 0 0);
@@ -138,16 +138,29 @@
     <div class="layer">
       <span class="num">01 — canvas</span>
       <h2>The agent draws, instead of you scrolling.</h2>
-      <p>Three MCP tools let a session render Markdown and a live progress checklist to a card that survives across turns. You glance instead of hunting the transcript for where it's at.</p>
+      <p>Four MCP tools let a session render Markdown, a live progress checklist, and a full document to a card that survives across turns. You glance instead of hunting the transcript for where it's at. The dashboard defaults to a single-column feed; a Pinterest-style masonry grid is one click away in Settings.</p>
       <div class="mock">render_markdown(...)   → notes &amp; explanations
 progress_set([...])    → the checklist
-progress_update(id, …) → tick one step</div>
+progress_update(id, …) → tick one step
+render_file("spec.md") → open it in the reading view</div>
     </div>
   </section>
 
   <section>
     <div class="layer">
-      <span class="num">02 — telemetry</span>
+      <span class="num">02 — review</span>
+      <h2>The spec it wrote, shown — not filed away.</h2>
+      <p>When the agent has a spec or plan for you to read, <code>render_file</code> opens it in a full reading view instead of saving a Markdown file you'd hunt down in an editor. It asks for your verdict in a plain message — so the approval relays through Claude Code Remote Control and you can read and accept it from your phone, away from the keyboard.</p>
+      <div class="mock"><span class="dot w"></span> auth-refactor — reviewing
+───────────────────────────
+  # Spec: token rotation
+  Approve to proceed →  reply in terminal · or from phone</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="layer">
+      <span class="num">03 — telemetry</span>
       <h2>Every session reports itself.</h2>
       <p>A hook posts each session's lifecycle — working, waiting, errored, finished — and a transcript reader adds tokens and an equivalent API cost. Nothing scraped; the data was already in the transcript. Cost is a usage gauge, not your subscription bill.</p>
       <div class="mock"><span class="dot w"></span> deixis        working   678k ctx
@@ -158,7 +171,7 @@ progress_update(id, …) → tick one step</div>
 
   <section>
     <div class="layer">
-      <span class="num">03 — menu bar</span>
+      <span class="num">04 — menu bar</span>
       <h2>One glyph that tells you when to look.</h2>
       <p>A SwiftBar plugin keeps it in the macOS menu bar: ◆ when everything's calm, ⚠ the moment a session is waiting for input or has errored. Click for the list — status, current tool, time in state, context size. No dollars in the bar, on purpose.</p>
       <div class="mock">⚠ 1

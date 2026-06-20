@@ -22,7 +22,8 @@ Open dashboard ↗               └──────────────�
 
 | Layer | What you get |
 |---|---|
-| **Canvas** | Three MCP tools let a session render Markdown and a live progress checklist to a card that persists across turns — stop scrolling the transcript to find where it's at. |
+| **Canvas** | Four MCP tools let a session render Markdown, a live progress checklist, and a full document to a card that persists across turns — stop scrolling the transcript to find where it's at. The dashboard defaults to a single-column feed; a Pinterest masonry grid is opt-in via Settings. |
+| **Review** | `render_file` opens a spec or plan the agent wants you to read in a full reading view — not a Markdown file you hunt down in an editor. It asks for the verdict in a plain message, so approval relays through Claude Code **Remote Control** and you can accept it from your phone. |
 | **Telemetry** | A hook reports every session (working / waiting / errored / finished) with tokens and an *equivalent API cost*, read straight from the transcript. Unified onto one card per session. |
 | **Menu bar** | A SwiftBar plugin: `◆` when all's calm, `⚠` when a session is waiting or errored. Click for the list — status, current tool, time-in-state, context size. |
 
@@ -60,9 +61,9 @@ pnpm monorepo, TypeScript throughout:
 |---|---|
 | `shared` | Protocol + domain types (the single source of truth) |
 | `hub` | Express + SSE server, in-memory store, telemetry (pricing, transcript, status) |
-| `shim` | Per-session stdio MCP server — the three canvas tools |
+| `shim` | Per-session stdio MCP server — the four canvas tools (`render_markdown`, `progress_set`, `progress_update`, `render_file`) |
 | `hook` | Tiny hook script that posts Claude Code events to the hub |
-| `web` | React 19 + Tailwind v4 dashboard (masonry grid, light/dark) |
+| `web` | React 19 + Tailwind v4 dashboard (feed / masonry layouts, reading overlay, Settings, light/dark) |
 | `menubar` | SwiftBar plugin (renderer + notifications) |
 | `cli` | `deixis init / uninstall / status / menubar` |
 
