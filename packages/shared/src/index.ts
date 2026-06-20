@@ -58,3 +58,18 @@ export type ServerEvent =
   | { type: "snapshot"; sessions: SessionState[] }
   | { type: "session"; session: SessionState }
   | { type: "remove"; sessionId: string };
+
+// ---- display helpers ----
+// Format a raw Claude Code tool name for the UI:
+//   mcp__deixis__progress_set → "◆ progress_set"  (our own tools, branded)
+//   mcp__todoist__add-tasks   → "todoist·add-tasks"
+//   Bash                      → "Bash"            (built-ins unchanged)
+export function formatTool(name: string): string {
+  if (!name.startsWith("mcp__")) return name;
+  const rest = name.slice(5); // drop "mcp__"
+  const sep = rest.indexOf("__");
+  if (sep === -1) return rest; // malformed; best-effort
+  const server = rest.slice(0, sep);
+  const tool = rest.slice(sep + 2);
+  return server === "deixis" ? `◆ ${tool}` : `${server}·${tool}`;
+}

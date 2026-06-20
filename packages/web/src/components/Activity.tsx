@@ -1,4 +1,4 @@
-import type { SessionTelemetry } from "@deixis/shared";
+import { formatTool, type SessionTelemetry } from "@deixis/shared";
 import { formatTokens, formatUsd } from "../lib/cost.js";
 
 export function Activity({ t }: { t: SessionTelemetry }) {
@@ -11,7 +11,7 @@ export function Activity({ t }: { t: SessionTelemetry }) {
       </div>
       {t.currentTool ? (
         <div className="truncate">
-          <span className="font-mono text-foreground">{t.currentTool}</span>
+          <span className="font-mono text-foreground">{formatTool(t.currentTool)}</span>
         </div>
       ) : null}
       {t.lastMessage ? <div className="line-clamp-2 italic">{t.lastMessage}</div> : null}
@@ -19,7 +19,7 @@ export function Activity({ t }: { t: SessionTelemetry }) {
         <div className="flex flex-wrap gap-1">
           {t.recentTools.map((tool, i) => (
             <span key={i} className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px]">
-              {tool}
+              {formatTool(tool)}
             </span>
           ))}
         </div>

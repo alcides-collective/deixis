@@ -1,4 +1,4 @@
-import type { SessionState, TelemetryStatus } from "@deixis/shared";
+import { formatTool, type SessionState, type TelemetryStatus } from "@deixis/shared";
 
 const DASHBOARD = "http://localhost:3939";
 
@@ -31,7 +31,7 @@ function needsAttention(s: SessionState): boolean {
 function line(s: SessionState, now: number): string {
   const t = s.telemetry!;
   const age = fmtAge(Math.max(0, now - t.statusSince));
-  const tool = t.currentTool ? ` ${t.currentTool}` : "";
+  const tool = t.currentTool ? ` ${formatTool(t.currentTool)}` : "";
   const ctx = t.contextTokens ? ` · ${fmtTokens(t.contextTokens)} ctx` : "";
   return `${ICON[t.status]} ${s.label}  ${t.status} ${age}${tool}${ctx} | color=${COLOR[t.status]}`;
 }
