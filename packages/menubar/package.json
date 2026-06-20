@@ -1,0 +1,9 @@
+{
+  "name": "@deixis/menubar",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/plugin.js",
+  "scripts": { "build": "tsc -p tsconfig.json", "test": "vitest run" },
+  "dependencies": { "@deixis/shared": "workspace:*" },
+  "devDependencies": { "@types/node": "^20.0.0" }
+}

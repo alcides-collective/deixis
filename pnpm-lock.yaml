@@ -56,6 +56,16 @@ importers:
         specifier: ^7.0.0
         version: 7.2.2
 
+  packages/menubar:
+    dependencies:
+      '@deixis/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.43
+
   packages/shared: {}
 
   packages/shim:
