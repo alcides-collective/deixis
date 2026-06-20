@@ -24,7 +24,13 @@ function useColumnCount(): number {
   return n;
 }
 
-function Card({ session }: { session: SessionState }) {
+function Card({
+  session,
+  onOpenDoc,
+}: {
+  session: SessionState;
+  onOpenDoc?: (s: SessionState) => void;
+}) {
   return (
     <motion.div
       // `layout` fights native masonry; only enable it in the fallback columns.
@@ -34,12 +40,18 @@ function Card({ session }: { session: SessionState }) {
       exit={{ opacity: 0, scale: 0.98 }}
       transition={{ duration: 0.3, ease: EASE }}
     >
-      <SessionCard session={session} />
+      <SessionCard session={session} onOpenDoc={onOpenDoc ? () => onOpenDoc(session) : undefined} />
     </motion.div>
   );
 }
 
-export function Grid({ sessions }: { sessions: SessionState[] }) {
+export function Grid({
+  sessions,
+  onOpenDoc,
+}: {
+  sessions: SessionState[];
+  onOpenDoc?: (s: SessionState) => void;
+}) {
   const columns = useColumnCount();
 
   if (!sessions.length) {
@@ -59,7 +71,7 @@ export function Grid({ sessions }: { sessions: SessionState[] }) {
       >
         <AnimatePresence>
           {sessions.map((s) => (
-            <Card key={s.sessionId} session={s} />
+            <Card key={s.sessionId} session={s} onOpenDoc={onOpenDoc} />
           ))}
         </AnimatePresence>
       </div>
@@ -77,7 +89,7 @@ export function Grid({ sessions }: { sessions: SessionState[] }) {
         <div key={i} className="flex min-w-0 flex-1 flex-col gap-4">
           <AnimatePresence>
             {col.map((s) => (
-              <Card key={s.sessionId} session={s} />
+              <Card key={s.sessionId} session={s} onOpenDoc={onOpenDoc} />
             ))}
           </AnimatePresence>
         </div>

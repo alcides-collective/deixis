@@ -5,7 +5,13 @@ import { ProgressList } from "./ProgressList.js";
 import { StatusPill } from "./StatusPill.js";
 import { Activity } from "./Activity.js";
 
-export function SessionCard({ session }: { session: SessionState }) {
+export function SessionCard({
+  session,
+  onOpenDoc,
+}: {
+  session: SessionState;
+  onOpenDoc?: () => void;
+}) {
   const [collapsed, setCollapsed] = useState(false);
   const collapsible = !!session.telemetry || session.hasCanvas;
 
@@ -27,6 +33,19 @@ export function SessionCard({ session }: { session: SessionState }) {
           ) : null}
           {session.label}
         </h2>
+        <span className="flex items-center gap-2">
+        {session.document && onOpenDoc ? (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenDoc();
+            }}
+            className="font-mono text-[11px] text-muted-foreground hover:text-foreground"
+            title={`Open ${session.document.title}`}
+          >
+            ▤ doc
+          </button>
+        ) : null}
         {session.telemetry ? (
           <StatusPill status={session.telemetry.status} />
         ) : (
@@ -36,6 +55,7 @@ export function SessionCard({ session }: { session: SessionState }) {
             }`}
           />
         )}
+        </span>
       </header>
 
       {!collapsed ? (
