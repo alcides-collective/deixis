@@ -14,6 +14,16 @@ const fontsOut = join(repoRoot, "packages", "web", "public", "fonts");
 const fontsSrc = join(process.env.HOME ?? "", "Downloads", "Helvetica Now");
 
 async function init() {
+  // Preflight: ensure the `claude` CLI is available before any mutation, so we
+  // never leave a half-installed state (service installed, MCP not registered).
+  try {
+    execFileSync("claude", ["--version"], { stdio: "ignore" });
+  } catch {
+    console.error(
+      "Error: the `claude` CLI was not found on PATH. Install Claude Code and ensure `claude` is runnable, then re-run `deixis init`.",
+    );
+    process.exit(1);
+  }
   console.log("Building packages…");
   execFileSync("pnpm", ["-r", "build"], { cwd: repoRoot, stdio: "inherit" });
   console.log("Converting fonts…");

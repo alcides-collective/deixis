@@ -4,11 +4,18 @@ const NAME = "deixis";
 
 export function registerMcp(shimEntry: string): void {
   // Registers the shim for all projects at user scope.
-  execFileSync(
-    "claude",
-    ["mcp", "add", "--scope", "user", NAME, "--", process.execPath, shimEntry],
-    { stdio: "inherit" },
-  );
+  try {
+    execFileSync(
+      "claude",
+      ["mcp", "add", "--scope", "user", NAME, "--", process.execPath, shimEntry],
+      { stdio: "inherit" },
+    );
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException)?.code === "ENOENT") {
+      throw new Error("claude CLI not found");
+    }
+    throw err;
+  }
 }
 
 export function unregisterMcp(): void {
