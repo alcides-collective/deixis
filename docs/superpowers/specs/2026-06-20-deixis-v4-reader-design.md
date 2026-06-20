@@ -19,6 +19,17 @@ because it needs Claude Code Channels and a per-session launch flag, and the
 reader alone already removes the actual pain (no more VS Code for a read-only
 review).
 
+### Hard requirement: accept from the phone, away from the keyboard
+v4.0 must let you approve/return a verdict from your phone via Claude Code
+**Remote Control**. This is guaranteed by keeping the verdict in Claude Code's
+**normal conversation turn** (which Remote Control relays and push-notifies),
+**not** an MCP elicitation (whose Remote Control relay is unverified). Because the
+Deixis reading overlay is localhost (not reachable from a phone), the agent must
+also include the spec content (or a concise summary + the file path) in that
+review-request message, so the document is *readable* inside Remote Control on the
+phone. The Deixis overlay is the at-the-desk reading surface; the conversation
+message is the away-from-keyboard one. Both are driven by the same skill step (§6).
+
 ### Why phased (research findings)
 - **No external injection:** nothing outside Claude Code can answer a pending
   Claude Code prompt, so a Deixis button can't resume the agent on its own.
@@ -102,10 +113,15 @@ Added to the shim alongside `render_markdown` / `progress_set` / `progress_updat
 ## 6. Skill nudge
 
 Update `~/.claude/skills/deixis/SKILL.md` (and the repo copy): instruct the agent
-that when it produces a spec/plan/doc for the user to review, it should call
-`render_file(path)` so the document shows on Deixis rather than asking the user to
-open it — then ask for the verdict as usual. The tool plus the behavior change are
-what make the workflow real (same pattern as v2's hooks).
+that when it produces a spec/plan/doc for the user to review, it should:
+1. call `render_file(path)` so the document shows on Deixis (the desk view), and
+2. ask for the verdict in a **plain conversation turn** — *not* an MCP elicitation
+   — and include the spec inline (or a concise summary + the file path) in that
+   message, so the user can read and approve it from **Remote Control on a phone**
+   (§1 hard requirement).
+
+The tool plus the behavior change are what make the workflow real (same pattern as
+v2's hooks).
 
 ---
 
