@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Helvetica Now Display";
+  src: url("/fonts/HelveticaNowDisplay-400.woff2") format("woff2");
+  font-weight: 400; font-display: swap;
+}
+@font-face {
+  font-family: "Helvetica Now Display";
+  src: url("/fonts/HelveticaNowDisplay-500.woff2") format("woff2");
+  font-weight: 500; font-display: swap;
+}
+@font-face {
+  font-family: "PP Supply Mono";
+  src: url("/fonts/PPSupplyMono-Regular.woff2") format("woff2");
+  font-weight: 400; font-display: swap;
+}
+
+@theme {
+  --font-sans: "Helvetica Now Display", Arial, sans-serif;
+  --font-mono: "PP Supply Mono", ui-monospace, monospace;
+  --radius: 0.625rem;
+  --color-background: oklch(1 0 0);
+  --color-foreground: oklch(0.145 0 0);
+  --color-muted: oklch(0.97 0 0);
+  --color-muted-foreground: oklch(0.556 0 0);
+  --color-border: oklch(0.922 0 0);
+  /* semantic status (light) */
+  --color-status-pending: oklch(0.65 0 0);
+  --color-status-active: oklch(0.72 0.15 75);
+  --color-status-done: oklch(0.6 0.13 150);
+  --color-status-failed: oklch(0.58 0.22 27);
+  --color-status-blocked: oklch(0.55 0 0);
+}
+
+.dark {
+  --color-background: oklch(0.145 0 0);
+  --color-foreground: oklch(0.985 0 0);
+  --color-muted: oklch(0.205 0 0);
+  --color-muted-foreground: oklch(0.708 0 0);
+  --color-border: oklch(1 0 0 / 12%);
+  --color-status-pending: oklch(0.6 0 0);
+  --color-status-active: oklch(0.8 0.15 75);
+  --color-status-done: oklch(0.72 0.15 150);
+  --color-status-failed: oklch(0.7 0.2 27);
+  --color-status-blocked: oklch(0.6 0 0);
+}
+
+html { font-family: var(--font-sans); }
+body { background: var(--color-background); color: var(--color-foreground); margin: 0; }
+* { border-color: var(--color-border); }

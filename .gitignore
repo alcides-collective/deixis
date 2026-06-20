@@ -12,6 +12,7 @@ build/
 
 # Fonts — converted locally by `deixis init`, never committed (proprietary)
 assets/fonts/
+packages/web/public/fonts/
 
 # Logs
 *.log
