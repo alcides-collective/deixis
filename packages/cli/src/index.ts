@@ -2,7 +2,7 @@
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { execFileSync } from "node:child_process";
-import { symlinkSync, unlinkSync, chmodSync } from "node:fs";
+import { writeFileSync, unlinkSync, chmodSync } from "node:fs";
 import { convertFonts } from "./fonts.js";
 import { installService, uninstallService } from "./launchd.js";
 import { registerMcp, unregisterMcp } from "./mcp.js";
@@ -71,27 +71,26 @@ function menubar(uninstall: boolean): void {
     );
     process.exit(1);
   }
-  const dest = join(dir, "deixis.5s.js");
-  if (uninstall) {
+  const dest = join(dir, "deixis.5s.sh");
+  const legacy = join(dir, "deixis.5s.js"); // older symlink form
+  // Always clear any prior install (both forms).
+  for (const p of [dest, legacy]) {
     try {
-      unlinkSync(dest);
+      unlinkSync(p);
     } catch {
-      /* not linked */
+      /* not present */
     }
+  }
+  if (uninstall) {
     console.log("Menu bar removed.");
     return;
   }
-  try {
-    chmodSync(pluginSrc, 0o755);
-  } catch {
-    /* best-effort */
-  }
-  try {
-    unlinkSync(dest);
-  } catch {
-    /* no prior link */
-  }
-  symlinkSync(pluginSrc, dest);
+  // SwiftBar runs plugins with a minimal PATH that lacks fnm's node, so the
+  // plugin's `#!/usr/bin/env node` shebang fails. Install a wrapper that invokes
+  // node by its absolute path instead.
+  const wrapper = `#!/bin/bash\nexec ${JSON.stringify(process.execPath)} ${JSON.stringify(pluginSrc)}\n`;
+  writeFileSync(dest, wrapper);
+  chmodSync(dest, 0o755);
   console.log(`Menu bar installed at ${dest} — SwiftBar will pick it up within 5s.`);
 }
 
