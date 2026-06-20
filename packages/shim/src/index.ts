@@ -3,6 +3,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { post, getSessionId, label } from "./hub-client.js";
+import { loadDocument } from "./document.js";
 
 // The card is created lazily — only when the session actually uses a canvas
 // tool. Sessions that never render produce no shim card (their telemetry card
@@ -68,6 +69,23 @@ server.tool(
         (await post(`/session/${getSessionId()}/progress/update`, { stepId, status, note })),
       "step updated",
     ),
+);
+
+server.tool(
+  "render_file",
+  "Show a file (e.g. a spec or plan, Markdown) in this session's Deixis reading view, so the user can review it in the browser instead of opening an editor. Then ask for their verdict in a normal message (include the spec inline) so they can also approve from Remote Control on a phone.",
+  { path: z.string() },
+  async ({ path }) => {
+    let doc;
+    try {
+      doc = loadDocument(path, process.cwd());
+    } catch {
+      return reply(`Deixis: can't read ${path}`, "");
+    }
+    const err =
+      (await ensureRegistered()) ?? (await post(`/session/${getSessionId()}/document`, doc));
+    return reply(err, "shown on Deixis");
+  },
 );
 
 async function main() {
