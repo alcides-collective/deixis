@@ -13,6 +13,7 @@
     --muted-fg: oklch(0.556 0 0);
     --border: oklch(0.922 0 0);
     --working: oklch(0.72 0.15 75);
+    --waiting: oklch(0.55 0.16 255);
     --done: oklch(0.6 0.13 150);
     --failed: oklch(0.58 0.22 27);
     --idle: oklch(0.72 0 0);
@@ -28,6 +29,7 @@
       --muted-fg: oklch(0.708 0 0);
       --border: oklch(1 0 0 / 12%);
       --working: oklch(0.8 0.15 75);
+      --waiting: oklch(0.7 0.15 255);
       --done: oklch(0.72 0.15 150);
       --failed: oklch(0.7 0.2 27);
       --idle: oklch(0.6 0 0);
@@ -73,7 +75,13 @@
   ul.steps li { display: flex; gap: 9px; padding: 3px 0; align-items: center; }
   ul.steps .g { width: 13px; color: var(--muted-fg); }
   .done-txt { opacity: .55; text-decoration: line-through; }
-  .ctx { font-size: 12px; color: var(--muted-fg); margin-top: 10px; font-family: var(--mono); }
+  .ctx { font-size: 12px; color: var(--muted-fg); margin-top: 12px; font-family: var(--mono); }
+  .note {
+    font-family: var(--mono); font-size: 12px; line-height: 1.5; color: var(--muted-fg);
+    margin-top: 12px; min-height: 1.5em;
+  }
+  .note.review { color: var(--fg); }
+  .note .from { color: var(--waiting); }
 
   /* sections */
   section { padding: 52px 0; }
@@ -122,13 +130,14 @@
         <span class="pill"><span class="dot" id="d-dot"></span><span id="d-status">working</span></span>
       </div>
       <div class="bar"><i id="d-bar"></i></div>
-      <ul class="steps">
-        <li><span class="g">✓</span><span class="done-txt">parse config</span></li>
-        <li><span class="g">✓</span><span class="done-txt">load schema</span></li>
-        <li><span class="g" id="d-g">⏳</span><span id="d-step">write tests</span></li>
-        <li><span class="g">○</span><span style="color:var(--muted-fg)">wire routes</span></li>
+      <ul class="steps" id="d-steps">
+        <li><span class="g">○</span><span>draft spec</span></li>
+        <li><span class="g">○</span><span>write tests</span></li>
+        <li><span class="g">○</span><span>wire routes</span></li>
+        <li><span class="g">○</span><span>run e2e</span></li>
       </ul>
-      <div class="ctx"><span id="d-ctx">128k</span> ctx · Bash</div>
+      <div class="note" id="d-note">◆ plan · rotate refresh tokens, 30-day window</div>
+      <div class="ctx"><span id="d-ctx">96k</span> ctx · $<span id="d-cost">0.21</span> · <span id="d-tool">Read</span></div>
     </div>
   </header>
 
@@ -223,47 +232,76 @@ node packages/cli/dist/index.js menubar   <span class="c"># SwiftBar glyph (need
     var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var statusEl = document.getElementById("d-status");
     var dotEl = document.getElementById("d-dot");
-    var markDot = document.getElementById("markdot");
     var barEl = document.getElementById("d-bar");
-    var gEl = document.getElementById("d-g");
-    var stepEl = document.getElementById("d-step");
     var ctxEl = document.getElementById("d-ctx");
-    var css = getComputedStyle(document.documentElement);
-    var working = css.getPropertyValue("--working").trim();
-    var done = css.getPropertyValue("--done").trim();
+    var costEl = document.getElementById("d-cost");
+    var toolEl = document.getElementById("d-tool");
+    var noteEl = document.getElementById("d-note");
+    var stepEls = [].slice.call(document.getElementById("d-steps").children);
+
+    // step state: 0 = pending, 1 = active, 2 = done
+    function setStep(li, st) {
+      var g = li.firstElementChild, label = li.lastElementChild;
+      if (st === 2) { g.textContent = "✓"; label.className = "done-txt"; label.style.color = ""; }
+      else if (st === 1) { g.textContent = "⏳"; label.className = ""; label.style.color = ""; }
+      else { g.textContent = "○"; label.className = ""; label.style.color = "var(--muted-fg)"; }
+    }
+
+    // The full session lifecycle: plan → review gate (waiting) → build → finished.
+    var FRAMES = [
+      { status: "working",  c: "--working", steps: [1,0,0,0], bar: 8,   ctx: 96,  cost: 0.21, tool: "Read",
+        note: "◆ plan · rotate refresh tokens, 30-day window", dwell: 1700 },
+      { status: "waiting",  c: "--waiting", steps: [2,0,0,0], bar: 24,  ctx: 138, cost: 0.52, tool: "render_file",
+        note: "▤ spec: token rotation — approve to proceed · <span class=\"from\">terminal or phone</span>", review: true, dwell: 3200 },
+      { status: "working",  c: "--working", steps: [2,1,0,0], bar: 44,  ctx: 171, cost: 0.73, tool: "Edit",
+        note: "◆ approved — writing failing tests first", dwell: 1700 },
+      { status: "working",  c: "--working", steps: [2,2,1,0], bar: 66,  ctx: 208, cost: 0.95, tool: "Bash",
+        note: "◆ tests green — wiring routes", dwell: 1700 },
+      { status: "working",  c: "--working", steps: [2,2,2,1], bar: 86,  ctx: 245, cost: 1.14, tool: "Bash",
+        note: "◆ running end-to-end", dwell: 1700 },
+      { status: "finished", c: "--done",    steps: [2,2,2,2], bar: 100, ctx: 262, cost: 1.24, tool: "—",
+        note: "✓ all checks green · shipped", dwell: 3400 }
+    ];
+
+    function paint(f) {
+      statusEl.textContent = f.status;
+      dotEl.style.background = "var(" + f.c + ")";
+      barEl.style.width = f.bar + "%";
+      for (var i = 0; i < stepEls.length; i++) setStep(stepEls[i], f.steps[i]);
+      noteEl.innerHTML = f.note;
+      noteEl.className = "note" + (f.review ? " review" : "");
+      toolEl.textContent = f.tool;
+    }
 
     // Static finished state for reduced-motion users.
     if (reduce) {
-      statusEl.textContent = "done"; dotEl.style.background = done;
-      barEl.style.width = "100%"; gEl.textContent = "✓";
-      stepEl.className = "done-txt"; ctxEl.textContent = "131k";
+      var last = FRAMES[FRAMES.length - 1];
+      paint(last); ctxEl.textContent = last.ctx + "k"; costEl.textContent = last.cost.toFixed(2);
       return;
     }
 
-    var ctx = 128;
-    function loop() {
-      // working → ticking
-      statusEl.textContent = "working"; dotEl.style.background = working;
-      gEl.textContent = "⏳"; stepEl.className = ""; barEl.style.width = "55%";
-      var t = 0;
-      var tick = setInterval(function () {
-        ctx += 1; ctxEl.textContent = ctx + "k"; t++;
-        if (t >= 22) {
-          clearInterval(tick);
-          // step completes → done
-          gEl.textContent = "✓"; stepEl.className = "done-txt"; barEl.style.width = "100%";
-          statusEl.textContent = "done"; dotEl.style.background = done;
-          setTimeout(reset, 2600);
-        }
-      }, 80);
+    function tween(from, to, dur, onUpdate) {
+      var start = null;
+      function frame(ts) {
+        if (start === null) start = ts;
+        var p = Math.min(1, (ts - start) / dur);
+        onUpdate(from + (to - from) * p);
+        if (p < 1) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
     }
-    function reset() {
-      ctx = 128; ctxEl.textContent = ctx + "k"; barEl.style.width = "33%";
-      gEl.textContent = "⏳"; stepEl.className = "";
-      setTimeout(loop, 600);
+
+    var curCtx = FRAMES[FRAMES.length - 1].ctx;
+    var curCost = FRAMES[FRAMES.length - 1].cost;
+    function show(i) {
+      var f = FRAMES[i];
+      paint(f);
+      tween(curCtx, f.ctx, 650, function (v) { ctxEl.textContent = Math.round(v) + "k"; });
+      tween(curCost, f.cost, 650, function (v) { costEl.textContent = v.toFixed(2); });
+      curCtx = f.ctx; curCost = f.cost;
+      setTimeout(function () { show((i + 1) % FRAMES.length); }, f.dwell);
     }
-    barEl.style.width = "33%";
-    setTimeout(loop, 900);
+    setTimeout(function () { show(0); }, 700);
   })();
 </script>
 </body>
