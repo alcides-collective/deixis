@@ -2,7 +2,20 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { post, sessionId, label } from "./hub-client.js";
+import { post, getSessionId, label } from "./hub-client.js";
+
+// The card is created lazily — only when the session actually uses a canvas
+// tool. Sessions that never render produce no shim card (their telemetry card
+// from the hook is enough), and id resolution is deferred to a point where it
+// is reliable.
+let registered = false;
+async function ensureRegistered(): Promise<string | null> {
+  if (registered) return null;
+  const err = await post(`/session/${getSessionId()}/register`, { label });
+  if (err) return err; // hub down — surface it; retry on the next call
+  registered = true;
+  return null;
+}
 
 const statusEnum = z.enum(["pending", "active", "done", "failed", "blocked"]);
 const stepSchema: z.ZodType<unknown> = z.lazy(() =>
@@ -26,7 +39,11 @@ server.tool(
   "Render Markdown to this session's Deixis canvas tab (replaces the markdown pane).",
   { markdown: z.string() },
   async ({ markdown }) =>
-    reply(await post(`/session/${sessionId}/markdown`, { markdown }), "rendered"),
+    reply(
+      (await ensureRegistered()) ??
+        (await post(`/session/${getSessionId()}/markdown`, { markdown })),
+      "rendered",
+    ),
 );
 
 server.tool(
@@ -34,7 +51,11 @@ server.tool(
   "Define or replace this session's progress checklist (supports one level of substeps).",
   { steps: z.array(stepSchema) },
   async ({ steps }) =>
-    reply(await post(`/session/${sessionId}/progress`, { steps }), "progress set"),
+    reply(
+      (await ensureRegistered()) ??
+        (await post(`/session/${getSessionId()}/progress`, { steps })),
+      "progress set",
+    ),
 );
 
 server.tool(
@@ -43,13 +64,14 @@ server.tool(
   { stepId: z.string(), status: statusEnum, note: z.string().optional() },
   async ({ stepId, status, note }) =>
     reply(
-      await post(`/session/${sessionId}/progress/update`, { stepId, status, note }),
+      (await ensureRegistered()) ??
+        (await post(`/session/${getSessionId()}/progress/update`, { stepId, status, note })),
       "step updated",
     ),
 );
 
 async function main() {
-  await post(`/session/${sessionId}/register`, { label });
+  // No startup register — the card is created lazily on first canvas tool use.
   const transport = new StdioServerTransport();
   await server.connect(transport);
 
@@ -61,7 +83,8 @@ async function main() {
     const safety = setTimeout(() => process.exit(0), 1000);
     safety.unref();
     try {
-      await post(`/session/${sessionId}/disconnect`, {});
+      // Only disconnect a card we actually created.
+      if (registered) await post(`/session/${getSessionId()}/disconnect`, {});
     } catch {
       // best-effort; we're exiting regardless
     }
