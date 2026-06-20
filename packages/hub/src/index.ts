@@ -7,6 +7,7 @@ import { createApp } from "./server.js";
 import { PricingTable, refreshPricing } from "./telemetry/pricing.js";
 import { StatusEngine } from "./telemetry/status.js";
 import { Telemetry } from "./telemetry/index.js";
+import { sweepFinished } from "./telemetry/sweep.js";
 
 const port = Number(process.env.DEIXIS_PORT ?? 3939);
 const store = new SessionStore();
@@ -19,6 +20,7 @@ const pricingCache = join(process.env.HOME ?? "", ".claude", "deixis", "pricing.
 void refreshPricing(table, pricingCache);
 setInterval(() => void refreshPricing(table, pricingCache), 24 * 60 * 60 * 1000).unref();
 setInterval(() => telemetry.tick(Date.now()), 10_000).unref();
+setInterval(() => sweepFinished(store), 15_000).unref();
 
 const here = dirname(fileURLToPath(import.meta.url));
 const webDist = join(here, "..", "..", "web", "dist");
