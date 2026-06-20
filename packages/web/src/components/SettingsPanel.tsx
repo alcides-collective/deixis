@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Close } from "@carbon/icons-react";
 import type { Layout } from "../lib/layout.js";
 
 export function SettingsPanel({
@@ -41,7 +42,7 @@ export function SettingsPanel({
             aria-label="Close"
             className="text-muted-foreground hover:text-foreground"
           >
-            ✕
+            <Close size={20} />
           </button>
         </header>
 

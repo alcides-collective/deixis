@@ -20,7 +20,7 @@ const ICON: Record<TelemetryStatus, string> = {
   working: "●", waiting: "◐", errored: "✗", idle: "○", finished: "✓",
 };
 const COLOR: Record<TelemetryStatus, string> = {
-  working: "#d08770", waiting: "#ebcb8b", errored: "#bf616a", idle: "#888888", finished: "#a3be8c",
+  working: "#d08770", waiting: "#5e81ac", errored: "#bf616a", idle: "#888888", finished: "#a3be8c",
 };
 
 function needsAttention(s: SessionState): boolean {

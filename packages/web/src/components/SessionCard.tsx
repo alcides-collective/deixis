@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ChevronDown, ChevronRight, Document } from "@carbon/icons-react";
 import type { SessionState } from "@deixis/shared";
 import { renderMarkdown } from "../lib/markdown.js";
 import { ProgressList } from "./ProgressList.js";
@@ -29,7 +30,9 @@ export function SessionCard({
       >
         <h2 className="flex items-center gap-2 text-[15px] font-medium">
           {collapsible ? (
-            <span className="w-2 text-[10px] text-muted-foreground">{collapsed ? "▸" : "▾"}</span>
+            <span className="text-muted-foreground">
+              {collapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
+            </span>
           ) : null}
           {session.label}
         </h2>
@@ -40,10 +43,10 @@ export function SessionCard({
               e.stopPropagation();
               onOpenDoc();
             }}
-            className="font-mono text-[11px] text-muted-foreground hover:text-foreground"
+            className="inline-flex items-center gap-1 font-mono text-[11px] text-muted-foreground hover:text-foreground"
             title={`Open ${session.document.title}`}
           >
-            ▤ doc
+            <Document size={14} /> doc
           </button>
         ) : null}
         {session.telemetry ? (

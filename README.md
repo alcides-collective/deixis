@@ -79,7 +79,7 @@ pnpm --filter @deixis/web dev   # dashboard with hot reload (proxies to :3939)
 
 - **macOS only** — the hub auto-starts via launchd; the menu bar needs the free [SwiftBar](https://swiftbar.app).
 - **Cost is a gauge, not a bill** — on a Max/Pro subscription the `$` figure is the *equivalent* pay-as-you-go API cost, priced from [OpenRouter](https://openrouter.ai). It's deliberately kept off the menu bar.
-- **Fonts** — the dashboard uses Helvetica Now Display, which is proprietary. The installer converts *your own licensed copy* locally; the fonts are never committed or shipped.
+- **Fonts** — the dashboard uses Overused Grotesk (with PP Supply Mono for monospace), which are proprietary. The installer copies *your own licensed copies* locally; the fonts are never committed or shipped.
 - **Local only** — no auth, no remote/cloud, no telemetry leaves your machine.
 
 ## License

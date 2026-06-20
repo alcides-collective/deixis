@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Settings } from "lucide-react";
+import { Settings } from "@carbon/icons-react";
 import type { SessionState } from "@deixis/shared";
 import { useSessions } from "./lib/useSessions.js";
 import { useTheme } from "./lib/theme.js";

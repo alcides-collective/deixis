@@ -13,7 +13,7 @@ export function formatTokens(n: number): string {
 
 const COLOR: Record<TelemetryStatus, string> = {
   working: "bg-status-active",
-  waiting: "bg-status-active",
+  waiting: "bg-status-waiting",
   idle: "bg-status-blocked",
   errored: "bg-status-failed",
   finished: "bg-status-done",

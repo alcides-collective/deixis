@@ -5,8 +5,7 @@
   "bin": { "deixis": "./dist/index.js" },
   "scripts": { "build": "tsc -p tsconfig.json" },
   "dependencies": {
-    "@deixis/shared": "workspace:*",
-    "wawoff2": "^2.0.1"
+    "@deixis/shared": "workspace:*"
   },
   "devDependencies": { "@types/node": "^20.0.0" }
 }

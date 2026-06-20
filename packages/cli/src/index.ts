@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { execFileSync } from "node:child_process";
 import { writeFileSync, unlinkSync, chmodSync } from "node:fs";
-import { convertFonts } from "./fonts.js";
+import { installFonts } from "./fonts.js";
 import { installService, uninstallService } from "./launchd.js";
 import { registerMcp, unregisterMcp } from "./mcp.js";
 import { installHooks, removeHooks } from "./hooks.js";
@@ -14,7 +14,7 @@ const hubEntry = join(repoRoot, "packages", "hub", "dist", "index.js");
 const shimEntry = join(repoRoot, "packages", "shim", "dist", "index.js");
 const hookEntry = join(repoRoot, "packages", "hook", "dist", "index.js");
 const fontsOut = join(repoRoot, "packages", "web", "public", "fonts");
-const fontsSrc = join(process.env.HOME ?? "", "Downloads", "Helvetica Now");
+const fontsSrc = join(process.env.HOME ?? "", "pollar", "apps", "frontend", "src", "app", "fonts");
 const pluginSrc = join(repoRoot, "packages", "menubar", "dist", "plugin.js");
 
 async function init() {
@@ -30,8 +30,8 @@ async function init() {
   }
   console.log("Building packages…");
   execFileSync("pnpm", ["-r", "build"], { cwd: repoRoot, stdio: "inherit" });
-  console.log("Converting fonts…");
-  await convertFonts(fontsSrc, fontsOut);
+  console.log("Installing fonts…");
+  await installFonts(fontsSrc, fontsOut);
   console.log("Building dashboard with fonts…");
   execFileSync("pnpm", ["--filter", "@deixis/web", "build"], { cwd: repoRoot, stdio: "inherit" });
   console.log("Installing hub service…");

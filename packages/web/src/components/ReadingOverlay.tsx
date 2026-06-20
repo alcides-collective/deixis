@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Close } from "@carbon/icons-react";
 import type { DocumentState } from "@deixis/shared";
 import { renderMarkdown } from "../lib/markdown.js";
 
@@ -27,7 +28,7 @@ export function ReadingOverlay({ doc, onClose }: { doc: DocumentState; onClose: 
             aria-label="Close"
             className="text-muted-foreground hover:text-foreground"
           >
-            ✕
+            <Close size={20} />
           </button>
         </header>
         <div
