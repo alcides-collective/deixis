@@ -1,3 +1,5 @@
+import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { dirname } from "node:path";
 import type { TokenUsage } from "@deixis/shared";
 import snapshot from "./pricing-snapshot.json" with { type: "json" };
 
@@ -46,4 +48,24 @@ export function computeCost(usage: TokenUsage, price: Price | null): number | nu
     usage.cacheCreate * price.input * CACHE_WRITE_MULT +
     usage.cacheRead * price.input * CACHE_READ_MULT
   );
+}
+
+const OPENROUTER_URL = "https://openrouter.ai/api/v1/models";
+
+export async function refreshPricing(table: PricingTable, cachePath: string): Promise<void> {
+  try {
+    const res = await fetch(OPENROUTER_URL, { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) throw new Error(`OpenRouter ${res.status}`);
+    const body = (await res.json()) as { data: OpenRouterModel[] };
+    table.load(body.data);
+    await mkdir(dirname(cachePath), { recursive: true });
+    await writeFile(cachePath, JSON.stringify(body.data));
+  } catch {
+    try {
+      const cached = JSON.parse(await readFile(cachePath, "utf8")) as OpenRouterModel[];
+      table.load(cached);
+    } catch {
+      /* keep snapshot-only families */
+    }
+  }
 }
