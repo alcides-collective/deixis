@@ -41,6 +41,10 @@ export function createApp(store: SessionStore, telemetry?: Telemetry): Express {
     store.disconnect(req.params.id),
   ));
 
+  app.get("/sessions", (_req, res) => {
+    res.json({ sessions: store.getAll() });
+  });
+
   app.get("/events", (req: Request, res: Response) => {
     res.set({
       "Content-Type": "text/event-stream",

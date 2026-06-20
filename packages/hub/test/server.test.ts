@@ -45,6 +45,16 @@ describe("hub routes", () => {
   });
 });
 
+describe("GET /sessions", () => {
+  it("returns a one-shot snapshot of all sessions", async () => {
+    const store = new SessionStore();
+    store.register("s1", "proj");
+    const res = await request(createApp(store)).get("/sessions").expect(200);
+    expect(res.body.sessions).toHaveLength(1);
+    expect(res.body.sessions[0].sessionId).toBe("s1");
+  });
+});
+
 describe("telemetry route", () => {
   it("accepts an event and sets session status", async () => {
     const store = new SessionStore();
