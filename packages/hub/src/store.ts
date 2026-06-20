@@ -49,9 +49,18 @@ export class SessionStore extends EventEmitter {
       status: "idle",
       usage: { input: 0, output: 0, cacheCreate: 0, cacheRead: 0 },
       costUsd: null,
+      contextTokens: 0,
+      statusSince: Date.now(),
       updatedAt: Date.now(),
     };
-    state.telemetry = { ...base, ...patch, updatedAt: Date.now() };
+    const now = Date.now();
+    const statusChanged = patch.status !== undefined && patch.status !== base.status;
+    state.telemetry = {
+      ...base,
+      ...patch,
+      statusSince: statusChanged ? now : base.statusSince,
+      updatedAt: now,
+    };
     state.hasTelemetry = true;
     this.emitSession(state);
     return state;

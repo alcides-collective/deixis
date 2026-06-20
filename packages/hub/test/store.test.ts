@@ -111,3 +111,32 @@ describe("SessionStore telemetry", () => {
     expect(s2.telemetry?.costUsd).toBe(0.5);
   });
 });
+
+describe("SessionStore statusSince", () => {
+  it("defaults statusSince and contextTokens on first telemetry", () => {
+    const store = new SessionStore();
+    store.ensureSession("id");
+    const s = store.setTelemetry("id", { status: "working" });
+    expect(typeof s.telemetry!.statusSince).toBe("number");
+    expect(s.telemetry!.contextTokens).toBe(0);
+  });
+
+  it("preserves statusSince on a non-status patch", () => {
+    const store = new SessionStore();
+    store.ensureSession("id");
+    const a = store.setTelemetry("id", { status: "working" });
+    const since = a.telemetry!.statusSince;
+    const b = store.setTelemetry("id", { contextTokens: 500 });
+    expect(b.telemetry!.statusSince).toBe(since);
+    expect(b.telemetry!.status).toBe("working");
+  });
+
+  it("re-stamps statusSince when status changes", () => {
+    const store = new SessionStore();
+    store.ensureSession("id");
+    const a = store.setTelemetry("id", { status: "working" });
+    const b = store.setTelemetry("id", { status: "idle" });
+    expect(b.telemetry!.statusSince).toBeGreaterThanOrEqual(a.telemetry!.statusSince);
+    expect(b.telemetry!.status).toBe("idle");
+  });
+});
