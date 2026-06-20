@@ -2,6 +2,9 @@ import { describe, it, expect } from "vitest";
 import request from "supertest";
 import { SessionStore } from "../src/store.js";
 import { createApp } from "../src/server.js";
+import { Telemetry } from "../src/telemetry/index.js";
+import { PricingTable } from "../src/telemetry/pricing.js";
+import { StatusEngine } from "../src/telemetry/status.js";
 
 function app() {
   return createApp(new SessionStore());
@@ -39,5 +42,20 @@ describe("hub routes", () => {
       });
     expect(res.body).toContain("snapshot");
     expect(res.body).toContain("id-1");
+  });
+});
+
+describe("telemetry route", () => {
+  it("accepts an event and sets session status", async () => {
+    const store = new SessionStore();
+    const tel = new Telemetry(store, new PricingTable(), new StatusEngine());
+    const a = createApp(store, tel);
+    await request(a)
+      .post("/telemetry/cc-1/event")
+      .send({ event: "PreToolUse", toolName: "Bash" })
+      .expect(200);
+    const s = store.getAll().find((x) => x.sessionId === "cc-1");
+    expect(s?.telemetry?.status).toBe("working");
+    expect(s?.telemetry?.currentTool).toBe("Bash");
   });
 });

@@ -1,6 +1,7 @@
 import express, { type Express, type Request, type Response } from "express";
 import type { ServerEvent } from "@deixis/shared";
 import { SessionStore } from "./store.js";
+import { Telemetry } from "./telemetry/index.js";
 
 function wrap(store: SessionStore, fn: (req: Request) => void) {
   return (req: Request, res: Response) => {
@@ -15,7 +16,7 @@ function wrap(store: SessionStore, fn: (req: Request) => void) {
   };
 }
 
-export function createApp(store: SessionStore): Express {
+export function createApp(store: SessionStore, telemetry?: Telemetry): Express {
   const app = express();
   app.use(express.json({ limit: "2mb" }));
 
@@ -53,6 +54,13 @@ export function createApp(store: SessionStore): Express {
     store.on("event", onEvent);
     req.on("close", () => store.off("event", onEvent));
   });
+
+  if (telemetry) {
+    app.post("/telemetry/:id/event", (req, res) => {
+      void telemetry.handleEvent(req.params.id, req.body ?? {});
+      res.json({ ok: true });
+    });
+  }
 
   return app;
 }
