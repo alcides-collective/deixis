@@ -112,6 +112,18 @@ describe("SessionStore telemetry", () => {
   });
 });
 
+describe("SessionStore.setDocument", () => {
+  it("stores a document with openedAt and emits", () => {
+    const store = new SessionStore();
+    const events: unknown[] = [];
+    store.on("event", (e) => events.push(e));
+    const s = store.setDocument("id", { path: "a/spec.md", title: "spec.md", markdown: "# Hi" });
+    expect(s.document).toMatchObject({ path: "a/spec.md", title: "spec.md", markdown: "# Hi" });
+    expect(typeof s.document!.openedAt).toBe("number");
+    expect(events.some((e: any) => e.type === "session")).toBe(true);
+  });
+});
+
 describe("SessionStore statusSince", () => {
   it("defaults statusSince and contextTokens on first telemetry", () => {
     const store = new SessionStore();

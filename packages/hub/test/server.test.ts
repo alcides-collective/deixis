@@ -55,6 +55,19 @@ describe("GET /sessions", () => {
   });
 });
 
+describe("POST /session/:id/document", () => {
+  it("accepts a document for a session", async () => {
+    const store = new SessionStore();
+    const a = createApp(store);
+    await request(a)
+      .post("/session/s1/document")
+      .send({ path: "spec.md", title: "spec.md", markdown: "# Spec" })
+      .expect(200);
+    const s = store.getAll().find((x) => x.sessionId === "s1");
+    expect(s?.document?.markdown).toBe("# Spec");
+  });
+});
+
 describe("telemetry route", () => {
   it("accepts an event and sets session status", async () => {
     const store = new SessionStore();

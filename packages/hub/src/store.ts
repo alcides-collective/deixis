@@ -43,6 +43,16 @@ export class SessionStore extends EventEmitter {
     return state;
   }
 
+  setDocument(
+    sessionId: string,
+    doc: { path: string; title: string; markdown: string },
+  ): SessionState {
+    const state = this.ensureSession(sessionId);
+    state.document = { ...doc, openedAt: Date.now() };
+    this.emitSession(state);
+    return state;
+  }
+
   setTelemetry(sessionId: string, patch: Partial<SessionTelemetry>): SessionState {
     const state = this.ensureSession(sessionId);
     const base: SessionTelemetry = state.telemetry ?? {

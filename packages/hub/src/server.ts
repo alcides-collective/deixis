@@ -40,6 +40,13 @@ export function createApp(store: SessionStore, telemetry?: Telemetry): Express {
   app.post("/session/:id/disconnect", wrap(store, (req) =>
     store.disconnect(req.params.id),
   ));
+  app.post("/session/:id/document", wrap(store, (req) =>
+    store.setDocument(req.params.id, {
+      path: String(req.body?.path ?? ""),
+      title: String(req.body?.title ?? "document"),
+      markdown: String(req.body?.markdown ?? ""),
+    }),
+  ));
 
   app.get("/sessions", (_req, res) => {
     res.json({ sessions: store.getAll() });
