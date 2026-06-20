@@ -5,7 +5,7 @@ import express from "express";
 import { SessionStore } from "./store.js";
 import { createApp } from "./server.js";
 
-const port = Number(process.env.DEIXIS_PORT ?? 3000);
+const port = Number(process.env.DEIXIS_PORT ?? 3939);
 const store = new SessionStore();
 const app = createApp(store);
 

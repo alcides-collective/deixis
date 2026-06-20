@@ -6,8 +6,8 @@ export default defineConfig({
   plugins: [react(), tailwind()],
   server: {
     proxy: {
-      "/session": "http://localhost:3000",
-      "/events": "http://localhost:3000",
+      "/session": "http://localhost:3939",
+      "/events": "http://localhost:3939",
     },
   },
 });

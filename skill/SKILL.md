@@ -1,12 +1,12 @@
 ---
 name: deixis
-description: Use when working through any multi-step task or plan and you want to show live progress and explanations on the Deixis canvas (a browser dashboard at localhost:3000). Activate at the start of planned/multi-step work, when the user says "show this on the canvas", "track this on deixis", "render progress", or whenever a visual companion to a terminal session would help. Drives the render_markdown, progress_set, and progress_update MCP tools.
+description: Use when working through any multi-step task or plan and you want to show live progress and explanations on the Deixis canvas (a browser dashboard at localhost:3939). Activate at the start of planned/multi-step work, when the user says "show this on the canvas", "track this on deixis", "render progress", or whenever a visual companion to a terminal session would help. Drives the render_markdown, progress_set, and progress_update MCP tools.
 ---
 
 # Deixis Canvas
 
 Deixis gives this terminal session its own card in a browser dashboard
-(`http://localhost:3000`). You push two things to it: a **progress checklist**
+(`http://localhost:3939`). You push two things to it: a **progress checklist**
 and a **markdown pane**. Use it to make a long task legible at a glance.
 
 The tools come from the `deixis` MCP server. If the hub isn't running, the tools

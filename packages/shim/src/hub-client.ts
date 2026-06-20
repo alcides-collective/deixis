@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { basename } from "node:path";
 
-export const HUB_URL = process.env.DEIXIS_HUB_URL ?? "http://localhost:3000";
+export const HUB_URL = process.env.DEIXIS_HUB_URL ?? "http://localhost:3939";
 export const sessionId = randomUUID();
 export const label = basename(process.cwd()) || "session";
 

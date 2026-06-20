@@ -34,7 +34,7 @@ async function init() {
   await installService(hubEntry);
   console.log("Registering MCP shim with Claude Code…");
   registerMcp(shimEntry);
-  console.log("Done. Open http://localhost:3000");
+  console.log("Done. Open http://localhost:3939");
 }
 
 async function uninstall() {
