@@ -54,7 +54,7 @@ export function Grid({ sessions }: { sessions: SessionState[] }) {
   if (NATIVE_MASONRY) {
     return (
       <div
-        className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4 p-4"
+        className="grid grid-cols-[repeat(auto-fill,minmax(min(320px,100%),1fr))] gap-4 p-4"
         style={{ gridTemplateRows: "masonry" }}
       >
         <AnimatePresence>
@@ -74,7 +74,7 @@ export function Grid({ sessions }: { sessions: SessionState[] }) {
   return (
     <div className="flex items-start gap-4 p-4">
       {cols.map((col, i) => (
-        <div key={i} className="flex flex-1 flex-col gap-4">
+        <div key={i} className="flex min-w-0 flex-1 flex-col gap-4">
           <AnimatePresence>
             {col.map((s) => (
               <Card key={s.sessionId} session={s} />

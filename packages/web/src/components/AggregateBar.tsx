@@ -11,7 +11,7 @@ export function AggregateBar({ sessions }: { sessions: SessionState[] }) {
     if (s.telemetry?.costUsd) cost += s.telemetry.costUsd;
   }
   return (
-    <div className="flex items-center gap-6 border-b px-4 py-2 text-[12px] text-muted-foreground">
+    <div className="flex flex-wrap items-center gap-x-6 gap-y-1 border-b px-4 py-2 text-[12px] text-muted-foreground">
       <span>{sessions.length} sessions</span>
       <span>{active} working</span>
       <span>{formatTokens(tokens)} tok</span>

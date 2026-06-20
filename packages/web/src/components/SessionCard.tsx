@@ -11,7 +11,7 @@ export function SessionCard({ session }: { session: SessionState }) {
 
   return (
     <article
-      className={`flex flex-col gap-4 rounded-[var(--radius)] border bg-background p-5 ${
+      className={`flex min-w-0 flex-col gap-4 rounded-[var(--radius)] border bg-background p-5 ${
         session.online ? "" : "opacity-50"
       }`}
     >
@@ -44,7 +44,7 @@ export function SessionCard({ session }: { session: SessionState }) {
           {session.hasCanvas ? <ProgressList steps={session.steps} /> : null}
           {session.hasCanvas && session.markdown ? (
             <div
-              className="prose-deixis text-[14px] leading-relaxed"
+              className="prose-deixis min-w-0 max-w-full text-[14px] leading-relaxed"
               dangerouslySetInnerHTML={{ __html: renderMarkdown(session.markdown) }}
             />
           ) : null}
