@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>deixis — a visual surface for terminal Claude Code</title>
+<meta name="description" content="Deixis gives terminal Claude Code a browser canvas the agent draws to, live per-session telemetry, and a menu-bar glance. macOS." />
+<style>
+  :root {
+    --bg: oklch(1 0 0);
+    --fg: oklch(0.145 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-fg: oklch(0.556 0 0);
+    --border: oklch(0.922 0 0);
+    --working: oklch(0.72 0.15 75);
+    --done: oklch(0.6 0.13 150);
+    --failed: oklch(0.58 0.22 27);
+    --idle: oklch(0.72 0 0);
+    --radius: 10px;
+    --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: oklch(0.145 0 0);
+      --fg: oklch(0.985 0 0);
+      --muted: oklch(0.205 0 0);
+      --muted-fg: oklch(0.708 0 0);
+      --border: oklch(1 0 0 / 12%);
+      --working: oklch(0.8 0.15 75);
+      --done: oklch(0.72 0.15 150);
+      --failed: oklch(0.7 0.2 27);
+      --idle: oklch(0.6 0 0);
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font-family: var(--sans); font-weight: 400; font-size: 15px; line-height: 1.6;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 28px; }
+  a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--border); }
+  a:hover { border-bottom-color: var(--fg); }
+  .eyebrow { font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted-fg); }
+  h1, h2, h3 { font-weight: 500; letter-spacing: -0.01em; }
+  hr { border: 0; border-top: 1px solid var(--border); margin: 0; }
+  code, pre, .mono { font-family: var(--mono); }
+
+  /* hero */
+  header.hero { padding: 88px 0 56px; }
+  .mark { display: inline-flex; align-items: center; gap: 9px; font-size: 13px; color: var(--muted-fg); }
+  .mark .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--working); }
+  h1.word { font-size: 46px; line-height: 1.05; margin: 22px 0 0; letter-spacing: -0.03em; }
+  .lead { font-size: 19px; line-height: 1.5; margin: 18px 0 0; max-width: 36ch; }
+  .aside { color: var(--muted-fg); font-size: 13.5px; margin: 14px 0 0; }
+  .cta { margin: 30px 0 0; display: flex; gap: 18px; align-items: baseline; font-size: 14px; }
+  .cta a { border-bottom-width: 1px; }
+  .cta .ghost { color: var(--muted-fg); }
+
+  /* card */
+  .card {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--bg); padding: 18px 18px 16px; margin: 40px 0 0; max-width: 360px;
+  }
+  .card .row { display: flex; align-items: center; justify-content: space-between; }
+  .card h3 { margin: 0; font-size: 15px; }
+  .pill { font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted-fg); display: inline-flex; align-items: center; gap: 6px; }
+  .pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--working); }
+  .bar { height: 3px; background: var(--muted); border-radius: 3px; margin: 12px 0; overflow: hidden; }
+  .bar > i { display: block; height: 100%; background: var(--fg); width: 33%; transition: width .5s ease; }
+  ul.steps { list-style: none; margin: 0; padding: 0; font-size: 13.5px; }
+  ul.steps li { display: flex; gap: 9px; padding: 3px 0; align-items: center; }
+  ul.steps .g { width: 13px; color: var(--muted-fg); }
+  .done-txt { opacity: .55; text-decoration: line-through; }
+  .ctx { font-size: 12px; color: var(--muted-fg); margin-top: 10px; font-family: var(--mono); }
+
+  /* sections */
+  section { padding: 52px 0; }
+  section + section { border-top: 1px solid var(--border); }
+  .layer { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  .layer h2 { font-size: 20px; margin: 10px 0 0; }
+  .layer p { margin: 6px 0 0; color: var(--fg); max-width: 52ch; }
+  .layer .num { font-family: var(--mono); font-size: 12px; color: var(--muted-fg); }
+  .mock {
+    margin: 20px 0 0; border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--muted); padding: 14px 16px; font-family: var(--mono); font-size: 12.5px;
+    line-height: 1.7; color: var(--fg); white-space: pre; overflow-x: auto;
+  }
+  .mock .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; vertical-align: middle; }
+  .w { background: var(--working); } .d { background: var(--done); } .f { background: var(--failed); } .i { background: var(--idle); }
+
+  pre.install {
+    margin: 18px 0 0; border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--muted); padding: 16px 18px; font-size: 13px; line-height: 1.7; overflow-x: auto;
+  }
+  pre.install .c { color: var(--muted-fg); }
+  .caveat { color: var(--muted-fg); font-size: 13px; margin: 14px 0 0; }
+
+  footer { padding: 40px 0 64px; color: var(--muted-fg); font-size: 13px; display: flex; gap: 18px; flex-wrap: wrap; }
+  @media (max-width: 520px) { h1.word { font-size: 38px; } .lead { font-size: 17px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="mark"><span class="dot" id="markdot"></span> for Claude Code · macOS</span>
+    <h1 class="word">deixis</h1>
+    <p class="lead">A visual surface for terminal Claude Code. The agent draws its plan to a browser canvas, every session reports its own status and cost, and a menu-bar glyph tells you which one needs you.</p>
+    <p class="aside">deixis — the pointing words: <em>this, here, look</em>.</p>
+    <div class="cta">
+      <a href="https://github.com/alcides-collective/deixis">GitHub →</a>
+      <span class="ghost">open-source · runs on your machine</span>
+    </div>
+
+    <div class="card" id="democard" aria-label="Example Deixis session card">
+      <div class="row">
+        <h3>auth-refactor</h3>
+        <span class="pill"><span class="dot" id="d-dot"></span><span id="d-status">working</span></span>
+      </div>
+      <div class="bar"><i id="d-bar"></i></div>
+      <ul class="steps">
+        <li><span class="g">✓</span><span class="done-txt">parse config</span></li>
+        <li><span class="g">✓</span><span class="done-txt">load schema</span></li>
+        <li><span class="g" id="d-g">⏳</span><span id="d-step">write tests</span></li>
+        <li><span class="g">○</span><span style="color:var(--muted-fg)">wire routes</span></li>
+      </ul>
+      <div class="ctx"><span id="d-ctx">128k</span> ctx · Bash</div>
+    </div>
+  </header>
+
+  <hr />
+
+  <section>
+    <div class="layer">
+      <span class="num">01 — canvas</span>
+      <h2>The agent draws, instead of you scrolling.</h2>
+      <p>Three MCP tools let a session render Markdown and a live progress checklist to a card that survives across turns. You glance instead of hunting the transcript for where it's at.</p>
+      <div class="mock">render_markdown(...)   → notes &amp; explanations
+progress_set([...])    → the checklist
+progress_update(id, …) → tick one step</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="layer">
+      <span class="num">02 — telemetry</span>
+      <h2>Every session reports itself.</h2>
+      <p>A hook posts each session's lifecycle — working, waiting, errored, finished — and a transcript reader adds tokens and an equivalent API cost. Nothing scraped; the data was already in the transcript. Cost is a usage gauge, not your subscription bill.</p>
+      <div class="mock"><span class="dot w"></span> deixis        working   678k ctx
+<span class="dot w"></span> pollar-chat   waiting   65k ctx
+<span class="dot i"></span> claude        idle      48k ctx</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="layer">
+      <span class="num">03 — menu bar</span>
+      <h2>One glyph that tells you when to look.</h2>
+      <p>A SwiftBar plugin keeps it in the macOS menu bar: ◆ when everything's calm, ⚠ the moment a session is waiting for input or has errored. Click for the list — status, current tool, time in state, context size. No dollars in the bar, on purpose.</p>
+      <div class="mock">⚠ 1
+───────────────────────────
+<span class="dot f"></span> api      errored  2m   Bash
+<span class="dot w"></span> deixis   working  9s   Edit · 678k
+<span class="dot i"></span> claude   idle     20m  · 48k</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="layer">
+      <span class="num">how it works</span>
+      <h2>One hub, two pipes, two surfaces.</h2>
+      <div class="mock">Claude Code session
+  ├─ MCP shim ──┐
+  └─ hook ──────┼──→  hub :3939  ──→  dashboard
+                            └───────→  menu bar</div>
+      <p style="margin-top:16px">A long-running hub holds state in memory and pushes updates over SSE. The MCP shim and the hook both report under Claude Code's real session id, so the agent's canvas and its telemetry land on one card.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="layer">
+      <span class="num">install</span>
+      <h2>Clone, init, done.</h2>
+<pre class="install"><span class="c"># macOS · Node 20+ · pnpm</span>
+git clone https://github.com/alcides-collective/deixis
+cd deixis &amp;&amp; pnpm install
+
+node packages/cli/dist/index.js init      <span class="c"># hub + tools + telemetry hooks</span>
+node packages/cli/dist/index.js menubar   <span class="c"># SwiftBar glyph (needs SwiftBar)</span></pre>
+      <p class="caveat">macOS only. The menu bar needs <a href="https://swiftbar.app">SwiftBar</a>. Brand fonts (Helvetica Now) are proprietary — the installer converts your own licensed copy locally and never ships them.</p>
+    </div>
+  </section>
+
+  <hr />
+
+  <footer>
+    <a href="https://github.com/alcides-collective/deixis">github.com/alcides-collective/deixis</a>
+    <span>built with Claude Code</span>
+    <span>not affiliated with Anthropic</span>
+  </footer>
+
+</div>
+
+<script>
+  (function () {
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var statusEl = document.getElementById("d-status");
+    var dotEl = document.getElementById("d-dot");
+    var markDot = document.getElementById("markdot");
+    var barEl = document.getElementById("d-bar");
+    var gEl = document.getElementById("d-g");
+    var stepEl = document.getElementById("d-step");
+    var ctxEl = document.getElementById("d-ctx");
+    var css = getComputedStyle(document.documentElement);
+    var working = css.getPropertyValue("--working").trim();
+    var done = css.getPropertyValue("--done").trim();
+
+    // Static finished state for reduced-motion users.
+    if (reduce) {
+      statusEl.textContent = "done"; dotEl.style.background = done;
+      barEl.style.width = "100%"; gEl.textContent = "✓";
+      stepEl.className = "done-txt"; ctxEl.textContent = "131k";
+      return;
+    }
+
+    var ctx = 128;
+    function loop() {
+      // working → ticking
+      statusEl.textContent = "working"; dotEl.style.background = working;
+      gEl.textContent = "⏳"; stepEl.className = ""; barEl.style.width = "55%";
+      var t = 0;
+      var tick = setInterval(function () {
+        ctx += 1; ctxEl.textContent = ctx + "k"; t++;
+        if (t >= 22) {
+          clearInterval(tick);
+          // step completes → done
+          gEl.textContent = "✓"; stepEl.className = "done-txt"; barEl.style.width = "100%";
+          statusEl.textContent = "done"; dotEl.style.background = done;
+          setTimeout(reset, 2600);
+        }
+      }, 80);
+    }
+    function reset() {
+      ctx = 128; ctxEl.textContent = ctx + "k"; barEl.style.width = "33%";
+      gEl.textContent = "⏳"; stepEl.className = "";
+      setTimeout(loop, 600);
+    }
+    barEl.style.width = "33%";
+    setTimeout(loop, 900);
+  })();
+</script>
+</body>
+</html>
