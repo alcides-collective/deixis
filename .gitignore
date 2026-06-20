@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Vite / React
+.vite/
+
+# Fonts — converted locally by `deixis init`, never committed (proprietary)
+assets/fonts/
+
+# Logs
+*.log
+logs/
+
+# Env
+.env
+.env.local
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
