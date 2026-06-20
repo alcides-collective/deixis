@@ -17,6 +17,32 @@ export interface SessionState {
   steps: Step[];
   connectedAt: number;
   online: boolean;
+  hasCanvas: boolean;       // agent pushed markdown/progress
+  hasTelemetry: boolean;    // hook/JSONL data present
+  telemetry?: SessionTelemetry;
+}
+
+// ---- telemetry ----
+export type TelemetryStatus =
+  | "working" | "idle" | "waiting" | "errored" | "finished";
+
+export interface TokenUsage {
+  input: number;
+  output: number;
+  cacheCreate: number;
+  cacheRead: number;
+}
+
+export interface SessionTelemetry {
+  status: TelemetryStatus;
+  model?: string;
+  usage: TokenUsage;
+  costUsd: number | null;   // null when model pricing is unknown
+  currentTool?: string;
+  recentTools?: string[];   // newest first, capped
+  lastMessage?: string;     // trimmed assistant snippet
+  pid?: number;
+  updatedAt: number;
 }
 
 // ---- shim -> hub request bodies ----
