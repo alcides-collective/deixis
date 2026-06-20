@@ -2,6 +2,7 @@
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { execFileSync } from "node:child_process";
+import { symlinkSync, unlinkSync, chmodSync } from "node:fs";
 import { convertFonts } from "./fonts.js";
 import { installService, uninstallService } from "./launchd.js";
 import { registerMcp, unregisterMcp } from "./mcp.js";
@@ -14,6 +15,7 @@ const shimEntry = join(repoRoot, "packages", "shim", "dist", "index.js");
 const hookEntry = join(repoRoot, "packages", "hook", "dist", "index.js");
 const fontsOut = join(repoRoot, "packages", "web", "public", "fonts");
 const fontsSrc = join(process.env.HOME ?? "", "Downloads", "Helvetica Now");
+const pluginSrc = join(repoRoot, "packages", "menubar", "dist", "plugin.js");
 
 async function init() {
   // Preflight: ensure the `claude` CLI is available before any mutation, so we
@@ -56,11 +58,49 @@ function status() {
   }
 }
 
+function menubar(uninstall: boolean): void {
+  let dir: string;
+  try {
+    dir = execFileSync("defaults", ["read", "com.ameba.SwiftBar", "PluginDirectory"], {
+      encoding: "utf8",
+    }).trim();
+  } catch {
+    console.log(
+      "SwiftBar not found or no plugin folder set.\n" +
+        "Install it (`brew install swiftbar`), open SwiftBar, set a plugin folder, then re-run `deixis menubar`.",
+    );
+    process.exit(1);
+  }
+  const dest = join(dir, "deixis.5s.js");
+  if (uninstall) {
+    try {
+      unlinkSync(dest);
+    } catch {
+      /* not linked */
+    }
+    console.log("Menu bar removed.");
+    return;
+  }
+  try {
+    chmodSync(pluginSrc, 0o755);
+  } catch {
+    /* best-effort */
+  }
+  try {
+    unlinkSync(dest);
+  } catch {
+    /* no prior link */
+  }
+  symlinkSync(pluginSrc, dest);
+  console.log(`Menu bar installed at ${dest} — SwiftBar will pick it up within 5s.`);
+}
+
 const cmd = process.argv[2];
 if (cmd === "init") await init();
 else if (cmd === "uninstall") await uninstall();
 else if (cmd === "status") status();
+else if (cmd === "menubar") menubar(process.argv.includes("--uninstall"));
 else {
-  console.log("Usage: deixis <init|uninstall|status>");
+  console.log("Usage: deixis <init|uninstall|status|menubar>");
   process.exit(1);
 }
