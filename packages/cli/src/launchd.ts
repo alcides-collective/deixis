@@ -9,6 +9,12 @@ function plistPath(): string {
   return join(process.env.HOME ?? "", "Library", "LaunchAgents", `${LABEL}.plist`);
 }
 
+// Per-user launchd domain for a LaunchAgent. getuid is always present on macOS
+// (the only platform we install on); the assertion satisfies strict TS.
+function guiDomain(): string {
+  return `gui/${process.getuid!()}`;
+}
+
 export async function installService(hubEntry: string): Promise<string> {
   const logDir = join(process.env.HOME ?? "", "Library", "Logs");
   await mkdir(logDir, { recursive: true });
@@ -28,14 +34,28 @@ export async function installService(hubEntry: string): Promise<string> {
 </plist>`;
   const path = plistPath();
   await writeFile(path, plist);
-  try { execFileSync("launchctl", ["unload", path]); } catch { /* not loaded yet */ }
-  execFileSync("launchctl", ["load", path]);
+  const domain = guiDomain();
+  // Modern launchctl (bootstrap/bootout supersede the deprecated load/unload).
+  // Boot out any prior instance so bootstrap doesn't fail on an already-loaded
+  // label; "not loaded" is the expected case on a clean install, so ignore its
+  // output (this is the noisy line the deprecated `unload` used to print).
+  try {
+    execFileSync("launchctl", ["bootout", `${domain}/${LABEL}`], { stdio: "ignore" });
+  } catch {
+    /* service wasn't loaded — fine */
+  }
+  // Let a genuine bootstrap failure surface (default stderr is inherited).
+  execFileSync("launchctl", ["bootstrap", domain, path]);
   return path;
 }
 
 export async function uninstallService(): Promise<void> {
   const path = plistPath();
   if (!existsSync(path)) return;
-  try { execFileSync("launchctl", ["unload", path]); } catch { /* already unloaded */ }
+  try {
+    execFileSync("launchctl", ["bootout", `${guiDomain()}/${LABEL}`], { stdio: "ignore" });
+  } catch {
+    /* already unloaded */
+  }
   await rm(path);
 }
