@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import type { SessionState } from "@deixis/shared";
+import type { Layout } from "../lib/layout.js";
 import { SessionCard } from "./SessionCard.js";
 
 const EASE = [0.4, 0, 0.2, 1] as const;
@@ -47,9 +48,11 @@ function Card({
 
 export function Grid({
   sessions,
+  layout = "feed",
   onOpenDoc,
 }: {
   sessions: SessionState[];
+  layout?: Layout;
   onOpenDoc?: (s: SessionState) => void;
 }) {
   const columns = useColumnCount();
@@ -59,6 +62,19 @@ export function Grid({
       <p className="p-8 text-[14px] text-muted-foreground">
         No active sessions. Run Claude Code with the Deixis MCP enabled.
       </p>
+    );
+  }
+
+  // Feed: single centered column, DOM order preserved.
+  if (layout === "feed") {
+    return (
+      <div className="mx-auto flex max-w-[600px] flex-col gap-4 p-4">
+        <AnimatePresence>
+          {sessions.map((s) => (
+            <Card key={s.sessionId} session={s} onOpenDoc={onOpenDoc} />
+          ))}
+        </AnimatePresence>
+      </div>
     );
   }
 
