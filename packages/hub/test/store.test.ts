@@ -86,3 +86,28 @@ describe("SessionStore mutations", () => {
     expect(() => store.updateStep("id-1", "ghost", "done")).toThrow();
   });
 });
+
+describe("SessionStore telemetry", () => {
+  it("register marks hasCanvas", () => {
+    const store = new SessionStore();
+    expect(store.register("id", "a").hasCanvas).toBe(true);
+  });
+
+  it("ensureSession creates a telemetry-only session", () => {
+    const store = new SessionStore();
+    const s = store.ensureSession("id", "proj");
+    expect(s.hasCanvas).toBe(false);
+    expect(s.hasTelemetry).toBe(false);
+  });
+
+  it("setTelemetry merges a patch and flags hasTelemetry", () => {
+    const store = new SessionStore();
+    store.ensureSession("id", "proj");
+    const s = store.setTelemetry("id", { status: "working" });
+    expect(s.hasTelemetry).toBe(true);
+    expect(s.telemetry?.status).toBe("working");
+    const s2 = store.setTelemetry("id", { costUsd: 0.5 });
+    expect(s2.telemetry?.status).toBe("working"); // preserved
+    expect(s2.telemetry?.costUsd).toBe(0.5);
+  });
+});

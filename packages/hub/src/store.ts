@@ -1,5 +1,5 @@
 import { EventEmitter } from "node:events";
-import type { Step, Status, SessionState, ServerEvent } from "@deixis/shared";
+import type { Step, Status, SessionState, ServerEvent, SessionTelemetry } from "@deixis/shared";
 
 function findStep(steps: Step[], id: string): Step | undefined {
   for (const s of steps) {
@@ -17,19 +17,42 @@ export class SessionStore extends EventEmitter {
 
   register(sessionId: string, label: string): SessionState {
     const unique = this.uniqueLabel(label || "session", sessionId);
-    const existing = this.sessions.get(sessionId);
-    const state: SessionState =
-      existing ?? {
+    const state = this.ensureSession(sessionId, unique);
+    state.label = unique;
+    state.online = true;
+    state.hasCanvas = true;
+    this.emitSession(state);
+    return state;
+  }
+
+  ensureSession(sessionId: string, label?: string): SessionState {
+    let state = this.sessions.get(sessionId);
+    if (!state) {
+      state = {
         sessionId,
-        label: unique,
+        label: label ?? sessionId.slice(0, 8),
         markdown: "",
         steps: [],
         connectedAt: Date.now(),
         online: true,
+        hasCanvas: false,
+        hasTelemetry: false,
       };
-    state.label = unique;
-    state.online = true;
-    this.sessions.set(sessionId, state);
+      this.sessions.set(sessionId, state);
+    }
+    return state;
+  }
+
+  setTelemetry(sessionId: string, patch: Partial<SessionTelemetry>): SessionState {
+    const state = this.ensureSession(sessionId);
+    const base: SessionTelemetry = state.telemetry ?? {
+      status: "idle",
+      usage: { input: 0, output: 0, cacheCreate: 0, cacheRead: 0 },
+      costUsd: null,
+      updatedAt: Date.now(),
+    };
+    state.telemetry = { ...base, ...patch, updatedAt: Date.now() };
+    state.hasTelemetry = true;
     this.emitSession(state);
     return state;
   }
