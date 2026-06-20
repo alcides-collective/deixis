@@ -60,28 +60,97 @@
   .cta a { border-bottom-width: 1px; }
   .cta .ghost { color: var(--muted-fg); }
 
-  /* card */
-  .card {
-    border: 1px solid var(--border); border-radius: var(--radius);
-    background: var(--bg); padding: 18px 18px 16px; margin: 40px 0 0; max-width: 360px;
+  /* ── live dashboard simulation (a faithful replica of localhost:3939) ── */
+  .sim {
+    position: relative; margin: 40px 0 0; border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden; background: var(--bg);
   }
-  .card .row { display: flex; align-items: center; justify-content: space-between; }
-  .card h3 { margin: 0; font-size: 15px; }
-  .pill { font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted-fg); display: inline-flex; align-items: center; gap: 6px; }
-  .pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--working); }
-  .bar { height: 3px; background: var(--muted); border-radius: 3px; margin: 12px 0; overflow: hidden; }
-  .bar > i { display: block; height: 100%; background: var(--fg); width: 33%; transition: width .5s ease; }
-  ul.steps { list-style: none; margin: 0; padding: 0; font-size: 13.5px; }
-  ul.steps li { display: flex; gap: 9px; padding: 3px 0; align-items: center; }
-  ul.steps .g { width: 13px; color: var(--muted-fg); }
-  .done-txt { opacity: .55; text-decoration: line-through; }
-  .ctx { font-size: 12px; color: var(--muted-fg); margin-top: 12px; font-family: var(--mono); }
-  .note {
-    font-family: var(--mono); font-size: 12px; line-height: 1.5; color: var(--muted-fg);
-    margin-top: 12px; min-height: 1.5em;
+  .winbar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; border-bottom: 1px solid var(--border); background: var(--muted);
   }
-  .note.review { color: var(--fg); }
-  .note .from { color: var(--waiting); }
+  .winbar .lights { display: inline-flex; gap: 7px; }
+  .winbar .lights i { width: 11px; height: 11px; border-radius: 50%; background: var(--border); }
+  .winbar .addr {
+    font-family: var(--mono); font-size: 12px; color: var(--muted-fg);
+    background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 3px 11px;
+  }
+
+  .dash-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; border-bottom: 1px solid var(--border);
+  }
+  .dash-head .brand { font-size: 13px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
+  .dash-head .gear {
+    display: inline-flex; padding: 7px; border: 1px solid var(--border);
+    border-radius: var(--radius); background: transparent; color: var(--fg); cursor: pointer;
+  }
+  svg.ico { fill: currentColor; display: block; }
+
+  .agg {
+    display: flex; flex-wrap: wrap; gap: 3px 24px; padding: 9px 16px;
+    border-bottom: 1px solid var(--border); font-size: 12px; color: var(--muted-fg);
+  }
+
+  .feed { display: flex; flex-direction: column; gap: 16px; padding: 16px; max-width: 600px; margin: 0 auto; }
+
+  .scard {
+    display: flex; flex-direction: column; gap: 16px; padding: 20px;
+    border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg);
+  }
+  .scard.off { opacity: .5; }
+  .scard .shead { display: flex; align-items: center; justify-content: space-between; }
+  .scard .title { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 500; }
+  .scard .title .chev { color: var(--muted-fg); display: inline-flex; }
+  .scard .right { display: flex; align-items: center; gap: 10px; }
+  .docbtn {
+    display: inline-flex; align-items: center; gap: 4px; font-family: var(--mono);
+    font-size: 11px; color: var(--muted-fg); background: none; border: 0; padding: 0; cursor: pointer;
+  }
+  .docbtn:hover { color: var(--fg); }
+
+  .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-fg); }
+  .pill .d, .prog .d { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+
+  .act { display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: var(--muted-fg); }
+  .act .toprow { display: flex; align-items: center; justify-content: space-between; }
+  .act .tool { font-family: var(--mono); color: var(--fg); }
+  .act .msg { font-style: italic; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .act .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .act .chips span { background: var(--muted); border-radius: 4px; padding: 2px 6px; font-family: var(--mono); font-size: 10px; }
+
+  .prog .phead { display: flex; justify-content: space-between; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-fg); margin-bottom: 8px; }
+  .prog .pbar { height: 4px; background: var(--muted); border-radius: 9999px; overflow: hidden; margin-bottom: 8px; }
+  .prog .pbar i { display: block; height: 100%; background: var(--fg); width: 0; border-radius: 9999px; transition: width .45s ease; }
+  .prog ul { list-style: none; margin: 0; padding: 0; }
+  .prog li { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 13px; }
+  .prog li.done .nm { opacity: .6; text-decoration: line-through; }
+
+  .md { font-size: 14px; line-height: 1.6; }
+  .md strong { font-weight: 500; }
+  .md code { font-family: var(--mono); font-size: .875em; background: var(--muted); padding: .1em .3em; border-radius: .25rem; }
+
+  /* render_file reading overlay */
+  .overlay {
+    position: absolute; inset: 0; z-index: 5; display: flex; justify-content: center;
+    overflow-y: auto; background: color-mix(in oklch, var(--bg) 72%, transparent);
+    backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity .4s ease;
+  }
+  .overlay.show { opacity: 1; }
+  .overlay .doc {
+    height: fit-content; width: 100%; max-width: 540px; margin: 30px 16px;
+    border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); padding: 26px;
+  }
+  .overlay .dhead { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px; }
+  .overlay .dhead .t { font-family: var(--mono); font-size: 13px; color: var(--muted-fg); }
+  .overlay .dhead .x { color: var(--muted-fg); background: none; border: 0; cursor: pointer; display: inline-flex; }
+  .overlay .md h3 { font-size: 16px; margin: 0 0 .5em; }
+  .overlay .md p { margin: .5em 0; }
+  .overlay .md ul { margin: .5em 0; padding-left: 1.25em; }
+  .overlay .foot { margin-top: 22px; border-top: 1px solid var(--border); padding-top: 12px; font-size: 12px; color: var(--muted-fg); }
+  .overlay .foot .mono { font-family: var(--mono); }
+
+  .simcap { font-size: 12.5px; color: var(--muted-fg); margin: 12px 0 0; text-align: center; }
 
   /* sections */
   section { padding: 52px 0; }
@@ -124,21 +193,121 @@
       <span class="ghost">open-source · runs on your machine</span>
     </div>
 
-    <div class="card" id="democard" aria-label="Example Deixis session card">
-      <div class="row">
-        <h3>auth-refactor</h3>
-        <span class="pill"><span class="dot" id="d-dot"></span><span id="d-status">working</span></span>
+    <div class="sim" id="sim" aria-label="Live replica of the Deixis dashboard">
+      <div class="winbar">
+        <span class="lights"><i></i><i></i><i></i></span>
+        <span class="addr">localhost:3939</span>
       </div>
-      <div class="bar"><i id="d-bar"></i></div>
-      <ul class="steps" id="d-steps">
-        <li><span class="g">○</span><span>draft spec</span></li>
-        <li><span class="g">○</span><span>write tests</span></li>
-        <li><span class="g">○</span><span>wire routes</span></li>
-        <li><span class="g">○</span><span>run e2e</span></li>
-      </ul>
-      <div class="note" id="d-note">◆ plan · rotate refresh tokens, 30-day window</div>
-      <div class="ctx"><span id="d-ctx">96k</span> ctx · $<span id="d-cost">0.21</span> · <span id="d-tool">Read</span></div>
+
+      <div class="dash-head">
+        <span class="brand">Deixis</span>
+        <span class="gear" aria-hidden="true"><svg class="ico" width="16" height="16" viewBox="0 0 32 32"><path d="M27 16.76c0-.25 0-.5 0-.76s0-.51 0-.77l1.92-1.68A2 2 0 0 0 29.3 11L26.94 7a2 2 0 0 0-1.73-1 2 2 0 0 0-.64.1l-2.43.82a11.35 11.35 0 0 0-1.31-.75l-.51-2.52a2 2 0 0 0-2-1.61h-4.72a2 2 0 0 0-2 1.61l-.51 2.52a11.48 11.48 0 0 0-1.31.75l-2.43-.82A2 2 0 0 0 6.79 6 2 2 0 0 0 5.06 7L2.7 11a2 2 0 0 0 .41 2.56L5 15.24c0 .25 0 .5 0 .76s0 .51 0 .77L3.11 18.44A2 2 0 0 0 2.7 21L5.06 25a2 2 0 0 0 1.73 1 2 2 0 0 0 .64-.1l2.43-.82a11.35 11.35 0 0 0 1.31.75l.51 2.52a2 2 0 0 0 2 1.61h4.72a2 2 0 0 0 2-1.61l.51-2.52a11.48 11.48 0 0 0 1.31-.75l2.43.82a2 2 0 0 0 .64.1 2 2 0 0 0 1.73-1L29.3 21a2 2 0 0 0-.41-2.56zM25.21 24l-3.43-1.16a8.86 8.86 0 0 1-2.71 1.57L18.36 28h-4.72l-.71-3.55a9.36 9.36 0 0 1-2.71-1.57L6.79 24 4.43 20l2.72-2.4a8.9 8.9 0 0 1 0-3.2L4.43 12 6.79 8l3.43 1.16a8.86 8.86 0 0 1 2.71-1.57L13.64 4h4.72l.71 3.55a9.36 9.36 0 0 1 2.71 1.57L25.21 8 27.57 12l-2.72 2.4a8.9 8.9 0 0 1 0 3.2L27.57 20zM16 22a6 6 0 1 1 6-6 6 6 0 0 1-6 6zm0-10a4 4 0 1 0 4 4 4 4 0 0 0-4-4z"/></svg></span>
+      </div>
+
+      <div class="agg">
+        <span>3 sessions</span>
+        <span id="agg-working">2 working</span>
+        <span id="agg-tok">118.0k tok</span>
+        <span id="agg-cost" title="equivalent API cost">$0.53</span>
+      </div>
+
+      <div class="feed">
+
+        <article class="scard" id="cardA">
+          <div class="shead">
+            <span class="title">
+              <span class="chev"><svg class="ico" width="16" height="16" viewBox="0 0 32 32"><path d="M16 22L6 12l1.4-1.4 8.6 8.6 8.6-8.6L26 12z"/></svg></span>
+              auth-refactor
+            </span>
+            <span class="right">
+              <button class="docbtn" id="A-doc"><svg class="ico" width="14" height="14" viewBox="0 0 32 32"><path d="M25.7 9.3l-7-7A.91.91 0 0 0 18 2H8a2 2 0 0 0-2 2v24a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V10a.91.91 0 0 0-.3-.7zM18 4.4l5.6 5.6H18zM24 28H8V4h8v6a2 2 0 0 0 2 2h6z"/></svg> doc</button>
+              <span class="pill"><span class="d" id="A-dot"></span><span id="A-status">working</span></span>
+            </span>
+          </div>
+          <div class="act">
+            <div class="toprow"><span id="A-tok">84.2k tok</span><span id="A-cost" title="equivalent API cost">$0.42</span></div>
+            <div class="tool" id="A-tool">Edit</div>
+            <div class="msg" id="A-msg">Rotating refresh tokens on a 30-day window — writing the failing tests first.</div>
+            <div class="chips" id="A-chips"><span>Bash</span><span>Read</span><span>◆ Progress Update</span></div>
+          </div>
+          <div class="prog">
+            <div class="phead"><span>Progress</span><span id="A-count">1/4</span></div>
+            <div class="pbar"><i id="A-bar"></i></div>
+            <ul id="A-steps">
+              <li><span class="d"></span><span class="nm">draft spec</span></li>
+              <li><span class="d"></span><span class="nm">write tests</span></li>
+              <li><span class="d"></span><span class="nm">wire routes</span></li>
+              <li><span class="d"></span><span class="nm">run e2e</span></li>
+            </ul>
+          </div>
+          <div class="md"><strong>Plan.</strong> Refresh tokens rotate on every use; reuse of a retired token revokes the whole family via <code>auth/rotate.ts</code>.</div>
+        </article>
+
+        <article class="scard" id="cardB">
+          <div class="shead">
+            <span class="title">
+              <span class="chev"><svg class="ico" width="16" height="16" viewBox="0 0 32 32"><path d="M16 22L6 12l1.4-1.4 8.6 8.6 8.6-8.6L26 12z"/></svg></span>
+              pollar-chat
+            </span>
+            <span class="right">
+              <span class="pill"><span class="d" id="B-dot"></span><span>working</span></span>
+            </span>
+          </div>
+          <div class="act">
+            <div class="toprow"><span>21.8k tok</span><span title="equivalent API cost">$0.07</span></div>
+            <div class="tool">◆ Render Markdown</div>
+            <div class="chips"><span>Read</span><span>Bash</span></div>
+          </div>
+          <div class="prog">
+            <div class="phead"><span>Progress</span><span>1/3</span></div>
+            <div class="pbar"><i style="width:33%"></i></div>
+            <ul>
+              <li class="done"><span class="d" data-st="done"></span><span class="nm">fetch threads</span></li>
+              <li><span class="d" data-st="active"></span><span class="nm">summarize</span></li>
+              <li><span class="d" data-st="pending"></span><span class="nm">render digest</span></li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="scard" id="cardC">
+          <div class="shead">
+            <span class="title">
+              <span class="chev"><svg class="ico" width="16" height="16" viewBox="0 0 32 32"><path d="M16 22L6 12l1.4-1.4 8.6 8.6 8.6-8.6L26 12z"/></svg></span>
+              api
+            </span>
+            <span class="right">
+              <span class="pill"><span class="d" id="C-dot"></span><span>errored</span></span>
+            </span>
+          </div>
+          <div class="act">
+            <div class="toprow"><span>12.0k tok</span><span title="equivalent API cost">$0.04</span></div>
+            <div class="tool">Bash</div>
+            <div class="msg">Error: connect ECONNREFUSED 127.0.0.1:5432 — is Postgres running?</div>
+          </div>
+        </article>
+
+      </div>
+
+      <div class="overlay" id="overlay">
+        <article class="doc">
+          <div class="dhead">
+            <span class="t">specs/token-rotation.md</span>
+            <span class="x" aria-hidden="true"><svg class="ico" width="20" height="20" viewBox="0 0 32 32"><path d="M24 9.4L22.6 8 16 14.6 9.4 8 8 9.4 14.6 16 8 22.6 9.4 24 16 17.4 22.6 24 24 22.6 17.4 16z"/></svg></span>
+          </div>
+          <div class="md">
+            <h3>Token rotation</h3>
+            <p>Refresh tokens rotate on every use within a 30-day sliding window. Reuse of a retired token is treated as compromise: revoke the whole family and force re-authentication.</p>
+            <ul>
+              <li>one active token per family</li>
+              <li>30-day sliding expiry</li>
+              <li>reuse ⇒ revoke + audit log</li>
+            </ul>
+          </div>
+          <div class="foot">Reviewing <span class="mono">specs/token-rotation.md</span> — reply in your Claude Code session.</div>
+        </article>
+      </div>
     </div>
+    <p class="simcap">A live replica of the dashboard at <code>localhost:3939</code> — running on a script.</p>
   </header>
 
   <hr />
@@ -230,75 +399,97 @@ node packages/cli/dist/index.js menubar   <span class="c"># SwiftBar glyph (need
 <script>
   (function () {
     var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    var statusEl = document.getElementById("d-status");
-    var dotEl = document.getElementById("d-dot");
-    var barEl = document.getElementById("d-bar");
-    var ctxEl = document.getElementById("d-ctx");
-    var costEl = document.getElementById("d-cost");
-    var toolEl = document.getElementById("d-tool");
-    var noteEl = document.getElementById("d-note");
-    var stepEls = [].slice.call(document.getElementById("d-steps").children);
+    var $ = function (id) { return document.getElementById(id); };
 
-    // step state: 0 = pending, 1 = active, 2 = done
-    function setStep(li, st) {
-      var g = li.firstElementChild, label = li.lastElementChild;
-      if (st === 2) { g.textContent = "✓"; label.className = "done-txt"; label.style.color = ""; }
-      else if (st === 1) { g.textContent = "⏳"; label.className = ""; label.style.color = ""; }
-      else { g.textContent = "○"; label.className = ""; label.style.color = "var(--muted-fg)"; }
+    // status → CSS color var (mirrors lib/cost.ts statusColor)
+    var STATUS = { working: "--working", waiting: "--waiting", finished: "--done", errored: "--failed", idle: "--idle" };
+    // progress step state → CSS color var (mirrors ProgressList dot map)
+    var STEP = { pending: "--idle", active: "--working", done: "--done" };
+    var v = function (name) { return "var(" + name + ")"; };
+
+    // Paint the static (non-animated) cards' status + step dots once.
+    $("B-dot").style.background = v(STATUS.working);
+    $("C-dot").style.background = v(STATUS.errored);
+    document.querySelectorAll(".prog .d[data-st]").forEach(function (d) {
+      d.style.background = v(STEP[d.getAttribute("data-st")]);
+    });
+
+    // ── Card A: the full session lifecycle ──
+    // plan/build → render_file review gate (waiting + reading overlay) → finished → loop.
+    // step state per row: 0 = pending, 1 = active, 2 = done.
+    var Aset = $("A-steps").children, Abar = $("A-bar");
+    function paintA(f) {
+      $("A-status").textContent = f.status;
+      $("A-dot").style.background = v(STATUS[f.status]);
+      var done = 0;
+      for (var i = 0; i < Aset.length; i++) {
+        var st = f.steps[i], li = Aset[i], dot = li.firstElementChild;
+        dot.style.background = v(st === 2 ? STEP.done : st === 1 ? STEP.active : STEP.pending);
+        li.className = st === 2 ? "done" : "";
+        if (st === 2) done++;
+      }
+      $("A-count").textContent = done + "/4";
+      Abar.style.width = (done / 4 * 100) + "%";
+      $("A-tool").textContent = f.tool;
+      $("A-tool").style.display = f.tool ? "" : "none";
+      $("A-msg").textContent = f.msg;
+      $("A-chips").innerHTML = f.chips.map(function (c) { return "<span>" + c + "</span>"; }).join("");
+      $("overlay").classList.toggle("show", !!f.review);
     }
 
-    // The full session lifecycle: plan → review gate (waiting) → build → finished.
     var FRAMES = [
-      { status: "working",  c: "--working", steps: [1,0,0,0], bar: 8,   ctx: 96,  cost: 0.21, tool: "Read",
-        note: "◆ plan · rotate refresh tokens, 30-day window", dwell: 1700 },
-      { status: "waiting",  c: "--waiting", steps: [2,0,0,0], bar: 24,  ctx: 138, cost: 0.52, tool: "render_file",
-        note: "▤ spec: token rotation — approve to proceed · <span class=\"from\">terminal or phone</span>", review: true, dwell: 3200 },
-      { status: "working",  c: "--working", steps: [2,1,0,0], bar: 44,  ctx: 171, cost: 0.73, tool: "Edit",
-        note: "◆ approved — writing failing tests first", dwell: 1700 },
-      { status: "working",  c: "--working", steps: [2,2,1,0], bar: 66,  ctx: 208, cost: 0.95, tool: "Bash",
-        note: "◆ tests green — wiring routes", dwell: 1700 },
-      { status: "working",  c: "--working", steps: [2,2,2,1], bar: 86,  ctx: 245, cost: 1.14, tool: "Bash",
-        note: "◆ running end-to-end", dwell: 1700 },
-      { status: "finished", c: "--done",    steps: [2,2,2,2], bar: 100, ctx: 262, cost: 1.24, tool: "—",
-        note: "✓ all checks green · shipped", dwell: 3400 }
+      { status: "working", steps: [2,1,0,0], tool: "Edit", tok: 84.2, cost: 0.42, dwell: 2400,
+        msg: "Rotating refresh tokens on a 30-day window — writing the failing tests first.",
+        chips: ["Bash", "Read", "◆ Progress Update"] },
+      { status: "working", steps: [2,2,1,0], tool: "Bash", tok: 96.8, cost: 0.51, dwell: 2400,
+        msg: "Tests green. Wiring rotation into the auth middleware now.",
+        chips: ["Edit", "◆ Progress Update", "Read"] },
+      { status: "waiting", steps: [2,2,1,0], tool: "◆ Render File", tok: 108.3, cost: 0.58, review: true, dwell: 4600,
+        msg: "Spec ready — approve to continue. Accept here or from your phone.",
+        chips: ["◆ Render File", "Edit", "Bash"] },
+      { status: "working", steps: [2,2,2,1], tool: "Bash", tok: 121.4, cost: 0.66, dwell: 2400,
+        msg: "Approved. Routes wired — running the end-to-end suite.",
+        chips: ["Bash", "◆ Render File", "Edit"] },
+      { status: "finished", steps: [2,2,2,2], tool: "", tok: 132.7, cost: 0.71, dwell: 4000,
+        msg: "All checks green. Branch ready to merge.",
+        chips: ["Bash", "Edit", "Read"] }
     ];
 
-    function paint(f) {
-      statusEl.textContent = f.status;
-      dotEl.style.background = "var(" + f.c + ")";
-      barEl.style.width = f.bar + "%";
-      for (var i = 0; i < stepEls.length; i++) setStep(stepEls[i], f.steps[i]);
-      noteEl.innerHTML = f.note;
-      noteEl.className = "note" + (f.review ? " review" : "");
-      toolEl.textContent = f.tool;
+    // Aggregate bar recomputes live from card A + the two static cards.
+    var B_TOK = 21.8, C_TOK = 12.0, B_COST = 0.07, C_COST = 0.04;
+    function paintAgg(aTok, aCost, aStatus) {
+      var working = 1 + (aStatus === "working" ? 1 : 0); // pollar-chat always working
+      $("agg-working").textContent = working + " working";
+      $("agg-tok").textContent = (aTok + B_TOK + C_TOK).toFixed(1) + "k tok";
+      $("agg-cost").textContent = "$" + (aCost + B_COST + C_COST).toFixed(2);
     }
 
-    // Static finished state for reduced-motion users.
-    if (reduce) {
-      var last = FRAMES[FRAMES.length - 1];
-      paint(last); ctxEl.textContent = last.ctx + "k"; costEl.textContent = last.cost.toFixed(2);
-      return;
-    }
+    if (reduce) { paintA(FRAMES[0]); $("A-tok").textContent = FRAMES[0].tok.toFixed(1) + "k tok"; $("A-cost").textContent = "$" + FRAMES[0].cost.toFixed(2); paintAgg(FRAMES[0].tok, FRAMES[0].cost, FRAMES[0].status); return; }
 
     function tween(from, to, dur, onUpdate) {
       var start = null;
-      function frame(ts) {
+      function step(ts) {
         if (start === null) start = ts;
         var p = Math.min(1, (ts - start) / dur);
         onUpdate(from + (to - from) * p);
-        if (p < 1) requestAnimationFrame(frame);
+        if (p < 1) requestAnimationFrame(step);
       }
-      requestAnimationFrame(frame);
+      requestAnimationFrame(step);
     }
 
-    var curCtx = FRAMES[FRAMES.length - 1].ctx;
-    var curCost = FRAMES[FRAMES.length - 1].cost;
+    var curTok = FRAMES[FRAMES.length - 1].tok, curCost = FRAMES[FRAMES.length - 1].cost;
     function show(i) {
       var f = FRAMES[i];
-      paint(f);
-      tween(curCtx, f.ctx, 650, function (v) { ctxEl.textContent = Math.round(v) + "k"; });
-      tween(curCost, f.cost, 650, function (v) { costEl.textContent = v.toFixed(2); });
-      curCtx = f.ctx; curCost = f.cost;
+      paintA(f);
+      var fromTok = curTok, fromCost = curCost, toTok = f.tok, toCost = f.cost;
+      tween(0, 1, 800, function (p) {
+        var tk = fromTok + (toTok - fromTok) * p;
+        var ct = fromCost + (toCost - fromCost) * p;
+        $("A-tok").textContent = tk.toFixed(1) + "k tok";
+        $("A-cost").textContent = "$" + ct.toFixed(2);
+        paintAgg(tk, ct, f.status);
+      });
+      curTok = f.tok; curCost = f.cost;
       setTimeout(function () { show((i + 1) % FRAMES.length); }, f.dwell);
     }
     setTimeout(function () { show(0); }, 700);
