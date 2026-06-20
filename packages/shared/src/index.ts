@@ -60,16 +60,26 @@ export type ServerEvent =
   | { type: "remove"; sessionId: string };
 
 // ---- display helpers ----
+// snake_case / kebab-case → Title Case: progress_update → "Progress Update".
+function humanize(s: string): string {
+  return s
+    .replace(/[_-]+/g, " ")
+    .split(" ")
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
 // Format a raw Claude Code tool name for the UI:
-//   mcp__deixis__progress_set → "◆ progress_set"  (our own tools, branded)
-//   mcp__todoist__add-tasks   → "todoist·add-tasks"
-//   Bash                      → "Bash"            (built-ins unchanged)
+//   mcp__deixis__progress_update → "◆ Progress Update"  (our own tools, branded)
+//   mcp__todoist__add-tasks      → "todoist·Add Tasks"
+//   Bash                         → "Bash"               (built-ins unchanged)
 export function formatTool(name: string): string {
   if (!name.startsWith("mcp__")) return name;
   const rest = name.slice(5); // drop "mcp__"
   const sep = rest.indexOf("__");
-  if (sep === -1) return rest; // malformed; best-effort
+  if (sep === -1) return humanize(rest); // malformed; best-effort
   const server = rest.slice(0, sep);
-  const tool = rest.slice(sep + 2);
+  const tool = humanize(rest.slice(sep + 2));
   return server === "deixis" ? `◆ ${tool}` : `${server}·${tool}`;
 }
