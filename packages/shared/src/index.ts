@@ -38,6 +38,8 @@ export interface SessionTelemetry {
   model?: string;
   usage: TokenUsage;
   costUsd: number | null;   // null when model pricing is unknown
+  contextTokens: number;    // last-turn input + cache_read (current context size)
+  statusSince: number;      // epoch ms when the status value last changed
   currentTool?: string;
   recentTools?: string[];   // newest first, capped
   lastMessage?: string;     // trimmed assistant snippet
