@@ -55,6 +55,47 @@ export class SessionStore extends EventEmitter {
     this.emit("event", event);
   }
 
+  setMarkdown(sessionId: string, markdown: string): SessionState {
+    const state = this.requireSession(sessionId);
+    state.markdown = markdown;
+    this.emitSession(state);
+    return state;
+  }
+
+  setProgress(sessionId: string, steps: Step[]): SessionState {
+    const state = this.requireSession(sessionId);
+    state.steps = steps;
+    this.emitSession(state);
+    return state;
+  }
+
+  updateStep(
+    sessionId: string,
+    stepId: string,
+    status: Status,
+    note?: string,
+  ): SessionState {
+    const state = this.requireSession(sessionId);
+    const step = this.findStepOrThrow(state, stepId);
+    step.status = status;
+    if (note !== undefined) step.note = note;
+    if (status === "active" && step.startedAt === undefined) {
+      step.startedAt = Date.now();
+    }
+    if (status === "done" || status === "failed") {
+      step.endedAt = Date.now();
+    }
+    this.emitSession(state);
+    return state;
+  }
+
+  disconnect(sessionId: string): void {
+    if (!this.sessions.has(sessionId)) return;
+    this.sessions.delete(sessionId);
+    const event: ServerEvent = { type: "remove", sessionId };
+    this.emit("event", event);
+  }
+
   private uniqueLabel(label: string, sessionId: string): string {
     const taken = new Set(
       [...this.sessions.values()]
